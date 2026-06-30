@@ -20,6 +20,8 @@ CodeStable 所有落盘产出的正文用**中文**：plan / design、plan revie
 
 ### 路径与目录约定
 
+- 本项目禁止在 git worktree / execution worktree 开发；直接在当前检出实现，并在对应 unit 目录写 `worktree-override.md` 作为 owner 批准标记
+
 ### 环境变量与凭证
 
 ### 其他
