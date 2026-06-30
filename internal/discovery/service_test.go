@@ -58,6 +58,50 @@ func TestPreviewScanEnumeratesKnownItems(t *testing.T) {
 	}
 }
 
+func TestPreviewScanEnrichesRolloutMetadata(t *testing.T) {
+	homeDir := t.TempDir()
+	root := filepath.Join(homeDir, ".codex")
+	buildFixtureRootAt(t, root)
+	service := newTestService()
+	service.now = func() time.Time { return time.Date(2026, 6, 30, 7, 8, 9, 4, time.UTC) }
+	service.userHomeDir = func() (string, error) { return homeDir, nil }
+	cleanupOutputDir(t, service)
+
+	result, err := service.RunReadOnlyScan()
+	if err != nil {
+		t.Fatalf("RunReadOnlyScan() error = %v", err)
+	}
+
+	manifest := readJSON[[]ManifestRecord](t, result.ManifestPath)
+	live := findManifestRecordBySuffix(t, manifest, filepath.Join("sessions", "live", "rollout-1.jsonl"))
+	if live.SessionUID == nil || *live.SessionUID != "session-keep" {
+		t.Fatalf("live session_uid = %#v", live.SessionUID)
+	}
+	if live.CwdRaw == nil || *live.CwdRaw != "/mnt/c/Work/Repo" {
+		t.Fatalf("live cwd_raw = %#v", live.CwdRaw)
+	}
+	if live.CwdNorm != `c:\work\repo` {
+		t.Fatalf("live cwd_norm = %q", live.CwdNorm)
+	}
+	if live.CanonicalPath != live.SourcePath {
+		t.Fatalf("live canonical_path = %q, source_path = %q", live.CanonicalPath, live.SourcePath)
+	}
+	if !containsEvidence(live.Evidence, "cli-visible") {
+		t.Fatalf("live evidence = %v", live.Evidence)
+	}
+
+	archived := findManifestRecordBySuffix(t, manifest, filepath.Join("sessions", "archived", "rollout-2.jsonl"))
+	if archived.SessionUID == nil || *archived.SessionUID != "session-keep" {
+		t.Fatalf("archived session_uid = %#v", archived.SessionUID)
+	}
+	if archived.CanonicalPath != live.SourcePath {
+		t.Fatalf("archived canonical_path = %q, want %q", archived.CanonicalPath, live.SourcePath)
+	}
+	if containsEvidence(archived.Evidence, "cli-visible") {
+		t.Fatalf("archived evidence should not be cli-visible: %v", archived.Evidence)
+	}
+}
+
 func TestPreviewScanUsesHomeFallback(t *testing.T) {
 	homeDir := t.TempDir()
 	root := filepath.Join(homeDir, ".codex")
@@ -106,6 +150,60 @@ func TestPreviewScanTracksUnknownCandidateFiles(t *testing.T) {
 	}
 	if !containsUnknownPath(unknownItems, "mystery-session.jsonl") {
 		t.Fatalf("unknown items missing mystery-session.jsonl: %#v", unknownItems)
+	}
+}
+
+func TestPreviewScanSkipsPluginCacheNoise(t *testing.T) {
+	homeDir := t.TempDir()
+	root := filepath.Join(homeDir, ".codex")
+	buildFixtureRootAt(t, root)
+	writeFixtureFile(t, root, filepath.Join(".tmp", "plugins", "noise.json"), "{}\n")
+	service := newTestService()
+	service.now = func() time.Time { return time.Date(2026, 6, 30, 7, 8, 9, 7, time.UTC) }
+	service.userHomeDir = func() (string, error) { return homeDir, nil }
+	cleanupOutputDir(t, service)
+
+	result, err := service.RunReadOnlyScan()
+	if err != nil {
+		t.Fatalf("RunReadOnlyScan() error = %v", err)
+	}
+
+	unknownItems := readJSON[[]UnknownItem](t, result.UnknownItemsPath)
+	if len(unknownItems) != 0 {
+		t.Fatalf("unknown items = %#v", unknownItems)
+	}
+}
+
+func TestPreviewScanKeepsBrokenRolloutMetadataVisible(t *testing.T) {
+	homeDir := t.TempDir()
+	root := filepath.Join(homeDir, ".codex")
+	buildFixtureRootAt(t, root)
+	writeFixtureFile(t, root, filepath.Join("sessions", "live", "rollout-1.jsonl"), "")
+	service := newTestService()
+	service.now = func() time.Time { return time.Date(2026, 6, 30, 7, 8, 9, 6, time.UTC) }
+	service.userHomeDir = func() (string, error) { return homeDir, nil }
+	cleanupOutputDir(t, service)
+
+	result, err := service.RunReadOnlyScan()
+	if err != nil {
+		t.Fatalf("RunReadOnlyScan() error = %v", err)
+	}
+
+	manifest := readJSON[[]ManifestRecord](t, result.ManifestPath)
+	live := findManifestRecordBySuffix(t, manifest, filepath.Join("sessions", "live", "rollout-1.jsonl"))
+	if !containsEvidence(live.Evidence, "rollout-metadata-missing") {
+		t.Fatalf("live evidence = %v", live.Evidence)
+	}
+	if live.CwdNorm != "" {
+		t.Fatalf("live cwd_norm = %q", live.CwdNorm)
+	}
+}
+
+func TestClassifyPathMarksArchivedSessionsAsArchivedRollout(t *testing.T) {
+	path := filepath.Join(`C:\Users\A\.codex`, "archived_sessions", "rollout-sample.jsonl")
+	kind, ok := classifyPath(path)
+	if !ok || kind != "archived_rollout_jsonl" {
+		t.Fatalf("classifyPath(%q) = (%q, %t)", path, kind, ok)
 	}
 }
 
@@ -173,15 +271,36 @@ func cleanupOutputDir(t *testing.T, service *Service) {
 
 func buildFixtureRootAt(t *testing.T, root string) {
 	t.Helper()
+	liveRolloutPath := filepath.Join(root, "sessions", "live", "rollout-1.jsonl")
 	writeFixtureFile(t, root, "config.toml", "theme = \"light\"\n")
 	writeFixtureFile(t, root, "auth.json", "{}\n")
 	writeFixtureFile(t, root, "credentials.json", "{}\n")
-	writeFixtureFile(t, root, "history.jsonl", "{}\n")
-	writeFixtureFile(t, root, "session_index.jsonl", "{}\n")
+	writeFixtureFile(t, root, "history.jsonl", jsonLine(map[string]any{
+		"session_id": "session-keep",
+		"ts":         1770901613,
+		"text":       "hello",
+	}))
+	writeFixtureFile(t, root, "session_index.jsonl",
+		jsonLine(map[string]any{
+			"id":             "session-keep",
+			"path":           liveRolloutPath,
+			"model_provider": "fox",
+			"status":         "active",
+		})+
+			jsonLine(map[string]any{
+				"id":          "session-title-only",
+				"thread_name": "ignored",
+				"updated_at":  "2026-06-30T07:08:00Z",
+			}),
+	)
 	writeFixtureFile(t, root, filepath.Join("sqlite", "state_main.sqlite"), "sqlite")
 	writeFixtureFile(t, root, filepath.Join("sqlite", "logs_main.sqlite"), "sqlite")
-	writeFixtureFile(t, root, filepath.Join("sessions", "live", "rollout-1.jsonl"), "{}\n")
-	writeFixtureFile(t, root, filepath.Join("sessions", "archived", "rollout-2.jsonl"), "{}\n")
+	writeFixtureFile(t, root, filepath.Join("sessions", "live", "rollout-1.jsonl"),
+		buildRolloutFixture("session-keep", "/mnt/c/Work/Repo", "2026-06-30T07:08:09Z"),
+	)
+	writeFixtureFile(t, root, filepath.Join("sessions", "archived", "rollout-2.jsonl"),
+		buildRolloutFixture("session-keep", "/mnt/c/Work/Repo", "2026-06-29T07:08:09Z"),
+	)
 }
 
 func writeFixtureFile(t *testing.T, root string, relativePath string, content string) {
@@ -247,4 +366,50 @@ func containsUnknownPath(items []UnknownItem, suffix string) bool {
 		}
 	}
 	return false
+}
+
+func findManifestRecordBySuffix(t *testing.T, records []ManifestRecord, suffix string) ManifestRecord {
+	t.Helper()
+	for _, record := range records {
+		if strings.HasSuffix(record.SourcePath, suffix) {
+			return record
+		}
+	}
+	t.Fatalf("manifest record not found: %s", suffix)
+	return ManifestRecord{}
+}
+
+func containsEvidence(evidence []string, token string) bool {
+	for _, item := range evidence {
+		if item == token {
+			return true
+		}
+	}
+	return false
+}
+
+func buildRolloutFixture(sessionUID string, cwd string, timestamp string) string {
+	return jsonLine(map[string]any{
+		"timestamp": timestamp,
+		"type":      "session_meta",
+		"payload": map[string]any{
+			"id":         sessionUID,
+			"cwd":        cwd,
+			"originator": "codex_cli_rs",
+			"source":     "cli",
+		},
+	}) + jsonLine(map[string]any{
+		"type": "message",
+		"payload": map[string]any{
+			"text": "hello",
+		},
+	})
+}
+
+func jsonLine(payload any) string {
+	data, err := json.Marshal(payload)
+	if err != nil {
+		panic(err)
+	}
+	return string(data) + "\n"
 }

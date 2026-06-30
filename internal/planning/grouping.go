@@ -252,5 +252,6 @@ func isArchivedRecord(record discovery.ManifestRecord) bool {
 	lowerPath := strings.ToLower(record.SourcePath)
 	return strings.Contains(lowerPath, `\archive\`) ||
 		strings.Contains(lowerPath, `\archives\`) ||
-		strings.Contains(lowerPath, `\archived\`)
+		strings.Contains(lowerPath, `\archived\`) ||
+		strings.Contains(lowerPath, `\archived_sessions\`)
 }

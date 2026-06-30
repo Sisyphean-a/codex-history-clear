@@ -79,11 +79,14 @@ func scanRoot(root string) ([]DiscoveryItem, []UnknownItem, error) {
 			return walkErr
 		}
 		if entry.IsDir() {
+			if shouldSkipDirectory(root, path) {
+				return fs.SkipDir
+			}
 			return nil
 		}
 		kind, ok := classifyPath(path)
 		if !ok {
-			if shouldTrackUnknown(path) {
+			if shouldTrackUnknown(root, path) {
 				unknownItems = append(unknownItems, UnknownItem{
 					SourceRoot: root,
 					Path:       path,
@@ -149,6 +152,7 @@ func rolloutKind(path string) string {
 		string(filepath.Separator) + "archive" + string(filepath.Separator),
 		string(filepath.Separator) + "archives" + string(filepath.Separator),
 		string(filepath.Separator) + "archived" + string(filepath.Separator),
+		string(filepath.Separator) + "archived_sessions" + string(filepath.Separator),
 	}
 	for _, marker := range archivedMarkers {
 		if strings.Contains(lowerPath, marker) {
@@ -158,7 +162,28 @@ func rolloutKind(path string) string {
 	return "rollout_jsonl"
 }
 
-func shouldTrackUnknown(path string) bool {
+func shouldSkipDirectory(root string, path string) bool {
+	relativePath, err := filepath.Rel(root, path)
+	if err != nil {
+		return false
+	}
+	relativePath = strings.ToLower(filepath.ToSlash(relativePath))
+	if relativePath == "." {
+		return false
+	}
+	firstSegment, _, _ := strings.Cut(relativePath, "/")
+	switch firstSegment {
+	case ".tmp", "plugins", "vendor_imports", "cache", "cxline":
+		return true
+	default:
+		return false
+	}
+}
+
+func shouldTrackUnknown(root string, path string) bool {
+	if !isHistoryCandidatePath(root, path) {
+		return false
+	}
 	name := strings.ToLower(filepath.Base(path))
 	switch {
 	case strings.HasSuffix(name, ".jsonl"):
@@ -172,6 +197,20 @@ func shouldTrackUnknown(path string) bool {
 	default:
 		return false
 	}
+}
+
+func isHistoryCandidatePath(root string, path string) bool {
+	relativePath, err := filepath.Rel(root, path)
+	if err != nil {
+		return false
+	}
+	relativePath = strings.ToLower(filepath.ToSlash(relativePath))
+	if !strings.Contains(relativePath, "/") {
+		return true
+	}
+	return strings.HasPrefix(relativePath, "sessions/") ||
+		strings.HasPrefix(relativePath, "archived_sessions/") ||
+		strings.HasPrefix(relativePath, "sqlite/")
 }
 
 func newDiscoveryItem(sourceRoot string, path string, kind string) (DiscoveryItem, error) {

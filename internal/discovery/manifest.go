@@ -1,9 +1,13 @@
 package discovery
 
 func buildManifest(items []DiscoveryItem) ([]ManifestRecord, error) {
+	context, err := loadManifestContext(items)
+	if err != nil {
+		return nil, err
+	}
 	records := make([]ManifestRecord, 0, len(items))
 	for _, item := range items {
-		record, ok, err := buildManifestRecord(item)
+		record, ok, err := buildManifestRecord(item, context)
 		if err != nil {
 			return nil, err
 		}
@@ -15,7 +19,7 @@ func buildManifest(items []DiscoveryItem) ([]ManifestRecord, error) {
 	return records, nil
 }
 
-func buildManifestRecord(item DiscoveryItem) (ManifestRecord, bool, error) {
+func buildManifestRecord(item DiscoveryItem, context manifestContext) (ManifestRecord, bool, error) {
 	storageKind, ok := storageKindFor(item.Kind)
 	if !ok {
 		return ManifestRecord{}, false, nil
@@ -24,17 +28,26 @@ func buildManifestRecord(item DiscoveryItem) (ManifestRecord, bool, error) {
 	if err != nil {
 		return ManifestRecord{}, false, err
 	}
+	sourcePath := cleanWindowsPath(item.Path)
+	realPath := cleanWindowsPath(realPathFor(item))
+	metadata, err := buildRecordMetadata(item, context, sourcePath, realPath)
+	if err != nil {
+		return ManifestRecord{}, false, err
+	}
 	return ManifestRecord{
+		SessionUID:    metadata.SessionUID,
+		ThreadUID:     metadata.ThreadUID,
 		StorageKind:   storageKind,
-		SourcePath:    item.Path,
-		CanonicalPath: item.Path,
-		RealPath:      realPathFor(item),
+		SourcePath:    sourcePath,
+		CanonicalPath: metadata.CanonicalPath,
+		RealPath:      realPath,
 		ReparseKind:   reparseKindFor(item),
+		CwdRaw:        metadata.CwdRaw,
+		CwdNorm:       metadata.CwdNorm,
 		UpdatedAt:     item.MTimeUTC,
 		ContentHash:   contentHash,
 		Preferred:     false,
-		Evidence:      evidenceFor(item.Kind),
-		CwdNorm:       "",
+		Evidence:      mergeEvidence(evidenceFor(item.Kind), metadata.Evidence),
 	}, true, nil
 }
 
