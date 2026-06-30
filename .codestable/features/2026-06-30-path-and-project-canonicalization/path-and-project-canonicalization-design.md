@@ -4,7 +4,7 @@ feature: 2026-06-30-path-and-project-canonicalization
 requirement: codex-history-management
 roadmap: codex-history-manager
 roadmap_item: path-and-project-canonicalization
-status: draft
+status: approved
 summary: 归一化路径表示并把路径别名与真实副本显式区分
 tags: [go, wails2, canonicalization, paths]
 ---

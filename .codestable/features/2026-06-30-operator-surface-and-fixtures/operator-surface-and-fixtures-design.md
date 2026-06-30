@@ -4,7 +4,7 @@ feature: 2026-06-30-operator-surface-and-fixtures
 requirement: codex-history-management
 roadmap: codex-history-manager
 roadmap_item: operator-surface-and-fixtures
-status: draft
+status: approved
 summary: 收口桌面工作区、样本夹具、证据导出和 smoke / build 验证
 tags: [wails2, workspace, fixtures, smoke]
 ---

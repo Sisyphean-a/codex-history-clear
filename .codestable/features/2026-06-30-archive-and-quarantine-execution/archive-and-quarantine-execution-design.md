@@ -4,7 +4,7 @@ feature: 2026-06-30-archive-and-quarantine-execution
 requirement: codex-history-management
 roadmap: codex-history-manager
 roadmap_item: archive-and-quarantine-execution
-status: draft
+status: approved
 summary: 执行 archive、quarantine、delete 和 repair_index 包装，并回传作业进度
 tags: [go, wails2, execution, rollback]
 ---

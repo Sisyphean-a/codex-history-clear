@@ -4,7 +4,7 @@ feature: 2026-06-30-duplicate-grouping-and-retention-planning
 requirement: codex-history-management
 roadmap: codex-history-manager
 roadmap_item: duplicate-grouping-and-retention-planning
-status: draft
+status: approved
 summary: 生成重复组、保留本和可复核的删除计划
 tags: [go, wails2, planning, retention]
 ---

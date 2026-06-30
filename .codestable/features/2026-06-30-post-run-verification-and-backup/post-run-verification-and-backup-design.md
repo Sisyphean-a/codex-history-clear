@@ -4,7 +4,7 @@ feature: 2026-06-30-post-run-verification-and-backup
 requirement: codex-history-management
 roadmap: codex-history-manager
 roadmap_item: post-run-verification-and-backup
-status: draft
+status: approved
 summary: 为 destructive 流程补齐在线备份、执行后复扫和一致性校验
 tags: [go, backup, verification, safety]
 ---
