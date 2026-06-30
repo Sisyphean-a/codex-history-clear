@@ -70,6 +70,8 @@ def run_command(command: str, cwd: Path) -> dict[str, Any]:
         cwd=cwd,
         shell=True,
         text=True,
+        encoding="utf-8",
+        errors="replace",
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         check=False,

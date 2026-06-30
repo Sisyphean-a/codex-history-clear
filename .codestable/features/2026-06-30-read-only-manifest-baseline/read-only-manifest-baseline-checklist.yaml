@@ -4,19 +4,19 @@ created: 2026-06-30
 steps:
   - action: "编排骨架：初始化 Wails2 壳层、Go 绑定入口和空扫描工作区"
     exit_signal: "桌面应用能启动，扫描按钮能触发 stub 结果并展示 run_id 占位"
-    status: pending
+    status: done
   - action: "发现节点：实现候选根目录枚举和 CLI 诊断快照采集"
     exit_signal: "给定夹具根目录时能返回对象清单与 CLI 诊断结果"
-    status: pending
+    status: done
   - action: "Artifact 节点：写 discovery.json 与 manifest-before.json，并回填 ScanResult"
     exit_signal: "一次扫描后能看到真实 artifact 路径且文件存在"
-    status: pending
+    status: done
   - action: "前端接线：渲染摘要、warnings 和 artifact 路径"
     exit_signal: "工作区能区分成功摘要、warning 和显式错误"
-    status: pending
+    status: done
   - action: "构建验证：固定 Go、frontend 和 Wails2 构建命令"
     exit_signal: "必跑命令都有真实入口，失败显式暴露且无 shim"
-    status: pending
+    status: done
 
 checks:
   - item: "扫描请求只能经 Go 绑定进入，前端不直接拼路径或命令"

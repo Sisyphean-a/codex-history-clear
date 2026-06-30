@@ -1,0 +1,22 @@
+{
+  "ok": true,
+  "action": "commit",
+  "findings": [],
+  "warnings": [],
+  "unit": ".codestable/features/2026-06-30-read-only-manifest-baseline",
+  "current_branch": "feat/read-only-manifest-baseline",
+  "default_branch": "master",
+  "staged_files": [],
+  "dirty_buckets": {},
+  "baseline": {
+    "unit": ".codestable/features/2026-06-30-read-only-manifest-baseline",
+    "default_branch": "master",
+    "default_head": "6850ca392f60934e16707ea9865b8b1311c2f8db",
+    "current_branch": "feat/read-only-manifest-baseline",
+    "worktree": "E:/github/codex-history-clear/.worktree/read-only-manifest-baseline",
+    "linked_worktree": true,
+    "timestamp": 1782803629
+  },
+  "post_baseline_implementation": [],
+  "required_review": ".codestable/features/2026-06-30-read-only-manifest-baseline/read-only-manifest-baseline-review.md"
+}

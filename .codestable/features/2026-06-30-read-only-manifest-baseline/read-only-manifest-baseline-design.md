@@ -4,7 +4,7 @@ feature: 2026-06-30-read-only-manifest-baseline
 requirement: codex-history-management
 roadmap: codex-history-manager
 roadmap_item: read-only-manifest-baseline
-status: draft
+status: approved
 summary: 初始化 Wails2 桌面壳层并产出只读 discovery / manifest 基线
 tags: [go, wails2, discovery, baseline]
 ---

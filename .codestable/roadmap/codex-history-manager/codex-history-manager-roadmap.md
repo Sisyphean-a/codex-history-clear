@@ -1,7 +1,7 @@
 ---
 doc_type: roadmap
 slug: codex-history-manager
-status: draft
+status: active
 created: 2026-06-30
 last_reviewed: 2026-06-30
 tags: [windows, codex, history, cleanup, go, wails2, desktop]
@@ -272,43 +272,43 @@ type ScanResult struct {
 1. **read-only-manifest-baseline** — 初始化 Wails2 桌面壳层并从候选根目录生成只读 discovery 快照和统一 manifest 基线
    - 所属模块：Wails2 Desktop Shell, Discovery Layer
    - 依赖：无
-   - 状态：planned
-   - 对应 feature：未启动
+   - 状态：in-progress
+   - 对应 feature：`2026-06-30-read-only-manifest-baseline`
    - 备注：最小闭环；完成后即可用真实样本验证定位规则并在界面展示摘要
 
 2. **path-and-project-canonicalization** — 归一化 Win32、WSL、reparse point 和 worktree 路径，区分路径别名与真实副本
    - 所属模块：Canonicalization & Planning Layer
    - 依赖：`read-only-manifest-baseline`
-   - 状态：planned
-   - 对应 feature：未启动
+   - 状态：in-progress
+   - 对应 feature：`2026-06-30-path-and-project-canonicalization`
    - 备注：为重复判定和 UI 标注提供统一坐标系
 
 3. **duplicate-grouping-and-retention-planning** — 基于统一 manifest 生成重复组、保留本和删除计划
    - 所属模块：Canonicalization & Planning Layer
    - 依赖：`read-only-manifest-baseline`, `path-and-project-canonicalization`
-   - 状态：planned
-   - 对应 feature：未启动
+   - 状态：in-progress
+   - 对应 feature：`2026-06-30-duplicate-grouping-and-retention-planning`
    - 备注：明确分离逻辑重复与物理重复
 
 4. **archive-and-quarantine-execution** — 执行 archive、quarantine、delete 和 repair_index 包装，并通过桌面壳层持续回传作业进度
    - 所属模块：Execution & Verification Layer
    - 依赖：`duplicate-grouping-and-retention-planning`
-   - 状态：planned
-   - 对应 feature：未启动
+   - 状态：in-progress
+   - 对应 feature：`2026-06-30-archive-and-quarantine-execution`
    - 备注：默认支持 dry-run、人工确认和 rollback journal
 
 5. **post-run-verification-and-backup** — 加入在线备份、执行后复扫、一致性校验和敏感文件保护
    - 所属模块：Execution & Verification Layer
    - 依赖：`archive-and-quarantine-execution`
-   - 状态：planned
-   - 对应 feature：未启动
+   - 状态：in-progress
+   - 对应 feature：`2026-06-30-post-run-verification-and-backup`
    - 备注：把回滚、安全和验证闭环补齐
 
 6. **operator-surface-and-fixtures** — 提供桌面工作区、样本夹具、报告导出和最小 smoke / build 验证
    - 所属模块：Wails2 Desktop Shell, Execution & Verification Layer
    - 依赖：`read-only-manifest-baseline`, `duplicate-grouping-and-retention-planning`, `post-run-verification-and-backup`
-   - 状态：planned
-   - 对应 feature：未启动
+   - 状态：in-progress
+   - 对应 feature：`2026-06-30-operator-surface-and-fixtures`
    - 备注：收口条目，确保桌面交互、样本验证和打包交付都有稳定入口
 
 **最小闭环**：第 1 条 `read-only-manifest-baseline` 做完后，系统就能启动桌面应用、对真实 `CODEX_HOME` 生成 discovery 快照、CLI 快照和统一 manifest 基线，并在界面呈现摘要。

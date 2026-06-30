@@ -1,0 +1,25 @@
+schema_version: 1
+goal: "codex-history-manager"
+status: active
+objective: "完成 codex-history-manager 整个 roadmap，实现基于 Go + Wails2 的 Windows 本地 Codex 会话历史管理桌面工具，并通过最终功能验收"
+start_point: "仓库当前只有 roadmap、ADR、requirement 和 6 份 feature design/checklist/design-review 文档；尚无 Go/Wails2 实现代码；git 仓库存在但没有 HEAD 基线提交"
+acceptance:
+  - "桌面应用能启动并展示只读扫描摘要"
+  - "能从真实或夹具候选根目录生成 discovery.json 与 manifest-before.json"
+  - "能正确归一化路径、生成重复组、保留本和可复核 delete-plan.json"
+  - "approved plan 的 destructive 动作可生成 rollback、after manifest 和一致性结论"
+  - "桌面工作区、fixture smoke 和 evidence pack 可支撑最终功能验收"
+non_goals:
+  - "不做 OpenAI 云端 Conversations / Responses 同步"
+  - "不做浏览器缓存和 WebView 用户数据的深度解析器"
+  - "不做直接修改 live SQLite 或 JSONL 的默认自动化路径"
+  - "不做 macOS / Linux 跨平台交付"
+budget:
+  kind: none
+  limit: null
+current_iteration: 9
+next_action: "Enter cs-feat-qa for read-only-manifest-baseline, collect desktop screenshot and real artifact evidence, and verify error/warning projections."
+blocker_signature: null
+blocker_count: 0
+owner_stop: null
+updated_at: "2026-06-30"

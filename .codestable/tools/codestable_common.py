@@ -119,6 +119,8 @@ def run_git(root: Path, *args: str) -> subprocess.CompletedProcess[str]:
         ["git", *args],
         cwd=root,
         text=True,
+        encoding="utf-8",
+        errors="replace",
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         check=False,
