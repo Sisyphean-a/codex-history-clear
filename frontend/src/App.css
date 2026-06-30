@@ -101,18 +101,6 @@
     color: #0f172a;
 }
 
-.指标值.ok {
-    color: #15803d;
-}
-
-.指标值.warn {
-    color: #b45309;
-}
-
-.指标值.risk {
-    color: #b91c1c;
-}
-
 .双栏 {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr);
@@ -135,37 +123,6 @@
     margin: 0;
     font-size: 13px;
     color: #475569;
-}
-
-.状态标记 {
-    display: inline-flex;
-    align-items: center;
-    height: 24px;
-    padding: 0 9px;
-    border-radius: 999px;
-    font-size: 12px;
-    font-weight: 600;
-    white-space: nowrap;
-}
-
-.状态标记.neutral {
-    background: #e2e8f0;
-    color: #334155;
-}
-
-.状态标记.ok {
-    background: #dcfce7;
-    color: #166534;
-}
-
-.状态标记.warn {
-    background: #fef3c7;
-    color: #92400e;
-}
-
-.状态标记.risk {
-    background: #fee2e2;
-    color: #991b1b;
 }
 
 .数据列 {
@@ -197,16 +154,6 @@
     color: #0f172a;
     font-family: "Fira Code", monospace;
     font-size: 12px;
-}
-
-.警告列表 {
-    margin: 0;
-    padding-left: 18px;
-    color: #7f1d1d;
-}
-
-.警告列表 li + li {
-    margin-top: 8px;
 }
 
 .表格壳 {

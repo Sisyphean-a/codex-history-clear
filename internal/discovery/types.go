@@ -1,12 +1,5 @@
 package discovery
 
-type ScanRequest struct {
-	CodexHome              string
-	ExtraRoots             []string
-	IncludeBrowserSidecars bool
-	OutputDir              string
-}
-
 type DiscoveryItem struct {
 	SourceRoot string   `json:"source_root"`
 	Path       string   `json:"path"`
@@ -16,13 +9,6 @@ type DiscoveryItem struct {
 	Attributes []string `json:"attributes"`
 	LinkType   *string  `json:"link_type"`
 	Target     *string  `json:"target"`
-}
-
-type CLISnapshot struct {
-	ExecutablePath  string `json:"executable_path"`
-	Available       bool   `json:"available"`
-	DoctorStatus    string `json:"doctor_status"`
-	ResumeSupported bool   `json:"resume_supported"`
 }
 
 type ManifestRecord struct {
@@ -53,7 +39,6 @@ type ScanSummary struct {
 	RootCount    int
 	ItemCount    int
 	UnknownCount int
-	WarningCount int
 }
 
 type ScanResult struct {
@@ -63,7 +48,5 @@ type ScanResult struct {
 	ManifestPath     string          `json:"manifest_path"`
 	UnknownItemsPath string          `json:"unknown_items_path"`
 	Summary          ScanSummary     `json:"summary"`
-	Warnings         []string        `json:"warnings"`
 	Items            []DiscoveryItem `json:"items"`
-	CLISnapshot      CLISnapshot     `json:"cli_snapshot"`
 }

@@ -4,7 +4,6 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
-	"errors"
 	"os"
 	"path/filepath"
 	"slices"
@@ -13,44 +12,32 @@ import (
 	"time"
 )
 
-func TestPreviewScanEnumeratesKnownItemsAndCLIState(t *testing.T) {
-	root := buildFixtureRoot(t)
+func TestPreviewScanEnumeratesKnownItems(t *testing.T) {
+	homeDir := t.TempDir()
+	root := filepath.Join(homeDir, ".codex")
+	buildFixtureRootAt(t, root)
 	service := newTestService()
-	service.lookPath = func(string) (string, error) { return `C:\Tools\codex.exe`, nil }
-	service.runCommand = fakeRunCommand(map[string]commandResult{
-		"--help":        {output: "commands: scan resume doctor"},
-		"doctor --json": {output: `{"status":"ok"}`},
-	})
-	outputDir := filepath.Join(t.TempDir(), "scan-output")
+	service.now = func() time.Time { return time.Date(2026, 6, 30, 7, 8, 9, 1, time.UTC) }
+	service.userHomeDir = func() (string, error) { return homeDir, nil }
+	cleanupOutputDir(t, service)
 
-	result, err := service.RunReadOnlyScan(ScanRequest{
-		CodexHome:              root,
-		IncludeBrowserSidecars: true,
-		OutputDir:              outputDir,
-	})
+	result, err := service.RunReadOnlyScan()
 	if err != nil {
 		t.Fatalf("RunReadOnlyScan() error = %v", err)
 	}
 
-	if result.Summary != (ScanSummary{RootCount: 1, ItemCount: 9, UnknownCount: 4, WarningCount: 0}) {
+	if result.Summary != (ScanSummary{RootCount: 1, ItemCount: 9, UnknownCount: 0}) {
 		t.Fatalf("Summary = %#v", result.Summary)
-	}
-	if result.CLISnapshot.DoctorStatus != "ok" || !result.CLISnapshot.ResumeSupported {
-		t.Fatalf("CLISnapshot = %#v", result.CLISnapshot)
 	}
 	assertKinds(t, result.Items, []string{
 		"auth_json", "config_toml", "credentials_json", "history_jsonl",
 		"logs_sqlite", "rollout_jsonl", "session_index_jsonl", "state_sqlite",
 		"archived_rollout_jsonl",
 	})
-	assertArtifactPathsInDir(t, outputDir, result)
 
 	discoveryDoc := readJSON[discoveryDocument](t, result.DiscoveryPath)
 	if discoveryDoc.RunID != result.RunID {
 		t.Fatalf("discovery run_id = %q, want %q", discoveryDoc.RunID, result.RunID)
-	}
-	if discoveryDoc.CLISnapshot.DoctorJSONPath == nil || *discoveryDoc.CLISnapshot.DoctorJSONPath != "codex-doctor.json" {
-		t.Fatalf("doctor_json_path = %#v", discoveryDoc.CLISnapshot.DoctorJSONPath)
 	}
 
 	manifest := readJSON[[]ManifestRecord](t, result.ManifestPath)
@@ -66,43 +53,31 @@ func TestPreviewScanEnumeratesKnownItemsAndCLIState(t *testing.T) {
 	})
 
 	unknownItems := readJSON[[]UnknownItem](t, result.UnknownItemsPath)
-	if len(unknownItems) != 4 {
-		t.Fatalf("unknown items = %d, want 4", len(unknownItems))
-	}
-	doctorJSONPath := filepath.Join(outputDir, "codex-doctor.json")
-	doctorJSON := readJSON[map[string]string](t, doctorJSONPath)
-	if doctorJSON["status"] != "ok" {
-		t.Fatalf("doctor json = %v", doctorJSON)
+	if len(unknownItems) != 0 {
+		t.Fatalf("unknown items = %d, want 0", len(unknownItems))
 	}
 }
 
-func TestPreviewScanUsesHomeFallbackAndCLIWarning(t *testing.T) {
+func TestPreviewScanUsesHomeFallback(t *testing.T) {
 	homeDir := t.TempDir()
 	root := filepath.Join(homeDir, ".codex")
 	writeFixtureFile(t, root, "history.jsonl", "{}\n")
 
 	service := newTestService()
+	service.now = func() time.Time { return time.Date(2026, 6, 30, 7, 8, 9, 2, time.UTC) }
 	service.userHomeDir = func() (string, error) { return homeDir, nil }
-	service.lookPath = func(string) (string, error) { return "", errors.New("missing") }
-	service.runCommand = func(time.Duration, string, ...string) (string, error) {
-		t.Fatal("runCommand should not be called when codex is unavailable")
-		return "", nil
-	}
-	outputDir := filepath.Join(t.TempDir(), "scan-output")
+	cleanupOutputDir(t, service)
 
-	result, err := service.RunReadOnlyScan(ScanRequest{OutputDir: outputDir})
+	result, err := service.RunReadOnlyScan()
 	if err != nil {
 		t.Fatalf("RunReadOnlyScan() error = %v", err)
 	}
 
-	if result.Summary != (ScanSummary{RootCount: 1, ItemCount: 1, UnknownCount: 0, WarningCount: 2}) {
+	if result.Summary != (ScanSummary{RootCount: 1, ItemCount: 1, UnknownCount: 0}) {
 		t.Fatalf("Summary = %#v", result.Summary)
 	}
-	if result.CLISnapshot.DoctorStatus != "unavailable" {
-		t.Fatalf("DoctorStatus = %q", result.CLISnapshot.DoctorStatus)
-	}
-	if result.DiscoveryPath != filepath.Join(outputDir, "discovery.json") {
-		t.Fatalf("DiscoveryPath = %q", result.DiscoveryPath)
+	if result.DiscoveryPath == "" || result.ManifestPath == "" || result.UnknownItemsPath == "" {
+		t.Fatalf("artifact paths are empty: %#v", result)
 	}
 	unknownItems := readJSON[[]UnknownItem](t, result.UnknownItemsPath)
 	if len(unknownItems) != 0 {
@@ -110,96 +85,24 @@ func TestPreviewScanUsesHomeFallbackAndCLIWarning(t *testing.T) {
 	}
 }
 
-func TestPreviewScanRejectsOutputInsideSourceRoot(t *testing.T) {
-	root := buildFixtureRoot(t)
-	service := newTestService()
-
-	_, err := service.RunReadOnlyScan(ScanRequest{
-		CodexHome:              root,
-		IncludeBrowserSidecars: true,
-		OutputDir:              filepath.Join(root, "tmp", "runs"),
-	})
-	if err == nil || !strings.Contains(err.Error(), "输出目录不能位于扫描目录内") {
-		t.Fatalf("RunReadOnlyScan() error = %v", err)
-	}
-}
-
-func TestPreviewScanRejectsPreexistingArtifactTarget(t *testing.T) {
-	root := buildFixtureRoot(t)
-	outputDir := filepath.Join(t.TempDir(), "scan-output")
-	if err := os.MkdirAll(outputDir, 0o755); err != nil {
-		t.Fatalf("MkdirAll(%q) error = %v", outputDir, err)
-	}
-	if err := os.WriteFile(filepath.Join(outputDir, "discovery.json"), []byte("existing"), 0o644); err != nil {
-		t.Fatalf("WriteFile(discovery.json) error = %v", err)
-	}
-
-	service := newTestService()
-	service.lookPath = func(string) (string, error) { return `C:\Tools\codex.exe`, nil }
-	service.runCommand = fakeRunCommand(map[string]commandResult{
-		"--help":        {output: "commands: scan resume doctor"},
-		"doctor --json": {output: `{"status":"ok"}`},
-	})
-
-	_, err := service.RunReadOnlyScan(ScanRequest{
-		CodexHome:              root,
-		IncludeBrowserSidecars: true,
-		OutputDir:              outputDir,
-	})
-	if err == nil || !strings.Contains(err.Error(), "输出文件已存在") {
-		t.Fatalf("RunReadOnlyScan() error = %v", err)
-	}
-}
-
-func TestPreviewScanMarksCLIUnavailableWhenHelpFails(t *testing.T) {
-	root := buildFixtureRoot(t)
-	service := newTestService()
-	service.lookPath = func(string) (string, error) { return `C:\Tools\codex.exe`, nil }
-	service.runCommand = fakeRunCommand(map[string]commandResult{
-		"--help": {output: "permission denied", err: errors.New("exit status 1")},
-	})
-
-	result, err := service.RunReadOnlyScan(ScanRequest{
-		CodexHome:              root,
-		IncludeBrowserSidecars: true,
-		OutputDir:              filepath.Join(t.TempDir(), "scan-output"),
-	})
-	if err != nil {
-		t.Fatalf("RunReadOnlyScan() error = %v", err)
-	}
-	if result.CLISnapshot.Available {
-		t.Fatalf("CLISnapshot.Available = true, want false")
-	}
-	if result.CLISnapshot.DoctorStatus != "unavailable" {
-		t.Fatalf("DoctorStatus = %q, want unavailable", result.CLISnapshot.DoctorStatus)
-	}
-	if len(result.Warnings) != 1 {
-		t.Fatalf("warnings = %v, want single warning", result.Warnings)
-	}
-}
-
 func TestPreviewScanTracksUnknownCandidateFiles(t *testing.T) {
-	root := buildFixtureRoot(t)
+	homeDir := t.TempDir()
+	root := filepath.Join(homeDir, ".codex")
+	buildFixtureRootAt(t, root)
 	writeFixtureFile(t, root, filepath.Join("sessions", "live", "mystery-session.jsonl"), "{}\n")
 	service := newTestService()
-	service.lookPath = func(string) (string, error) { return `C:\Tools\codex.exe`, nil }
-	service.runCommand = fakeRunCommand(map[string]commandResult{
-		"--help":        {output: "commands: scan resume doctor"},
-		"doctor --json": {output: `{"status":"ok"}`},
-	})
+	service.now = func() time.Time { return time.Date(2026, 6, 30, 7, 8, 9, 3, time.UTC) }
+	service.userHomeDir = func() (string, error) { return homeDir, nil }
+	cleanupOutputDir(t, service)
 
-	result, err := service.RunReadOnlyScan(ScanRequest{
-		CodexHome:              root,
-		IncludeBrowserSidecars: true,
-		OutputDir:              filepath.Join(t.TempDir(), "scan-output"),
-	})
+	result, err := service.RunReadOnlyScan()
 	if err != nil {
 		t.Fatalf("RunReadOnlyScan() error = %v", err)
 	}
 
 	unknownItems := readJSON[[]UnknownItem](t, result.UnknownItemsPath)
-	if len(unknownItems) != 5 {
-		t.Fatalf("unknown items = %d, want 5", len(unknownItems))
+	if len(unknownItems) != 1 {
+		t.Fatalf("unknown items = %d, want 1", len(unknownItems))
 	}
 	if !containsUnknownPath(unknownItems, "mystery-session.jsonl") {
 		t.Fatalf("unknown items missing mystery-session.jsonl: %#v", unknownItems)
@@ -208,11 +111,8 @@ func TestPreviewScanTracksUnknownCandidateFiles(t *testing.T) {
 
 func TestPreviewScanRejectsMissingRoot(t *testing.T) {
 	service := newTestService()
-	_, err := service.RunReadOnlyScan(ScanRequest{
-		CodexHome:              filepath.Join(t.TempDir(), "missing"),
-		IncludeBrowserSidecars: true,
-		OutputDir:              filepath.Join(t.TempDir(), "scan-output"),
-	})
+	service.userHomeDir = func() (string, error) { return filepath.Join(t.TempDir(), "missing"), nil }
+	_, err := service.RunReadOnlyScan()
 	if err == nil || !strings.Contains(err.Error(), "扫描目录不存在") {
 		t.Fatalf("RunReadOnlyScan() error = %v", err)
 	}
@@ -256,30 +156,23 @@ func TestContentHashForLargeFile(t *testing.T) {
 	}
 }
 
-type commandResult struct {
-	output string
-	err    error
-}
-
 func newTestService() *Service {
 	service := NewService()
 	service.now = func() time.Time { return time.Date(2026, 6, 30, 7, 8, 9, 0, time.UTC) }
+	service.userHomeDir = func() (string, error) { return os.TempDir(), nil }
 	return service
 }
 
-func fakeRunCommand(results map[string]commandResult) func(time.Duration, string, ...string) (string, error) {
-	return func(_ time.Duration, _ string, args ...string) (string, error) {
-		result, ok := results[strings.Join(args, " ")]
-		if !ok {
-			return "", errors.New("unexpected command")
-		}
-		return result.output, result.err
+func cleanupOutputDir(t *testing.T, service *Service) {
+	t.Helper()
+	outputDir := filepath.Join(os.TempDir(), "codex-history-manager", "runs", buildRunID(service.now().UTC()))
+	if err := os.RemoveAll(outputDir); err != nil {
+		t.Fatalf("RemoveAll(%q) error = %v", outputDir, err)
 	}
 }
 
-func buildFixtureRoot(t *testing.T) string {
+func buildFixtureRootAt(t *testing.T, root string) {
 	t.Helper()
-	root := t.TempDir()
 	writeFixtureFile(t, root, "config.toml", "theme = \"light\"\n")
 	writeFixtureFile(t, root, "auth.json", "{}\n")
 	writeFixtureFile(t, root, "credentials.json", "{}\n")
@@ -289,7 +182,6 @@ func buildFixtureRoot(t *testing.T) string {
 	writeFixtureFile(t, root, filepath.Join("sqlite", "logs_main.sqlite"), "sqlite")
 	writeFixtureFile(t, root, filepath.Join("sessions", "live", "rollout-1.jsonl"), "{}\n")
 	writeFixtureFile(t, root, filepath.Join("sessions", "archived", "rollout-2.jsonl"), "{}\n")
-	return root
 }
 
 func writeFixtureFile(t *testing.T, root string, relativePath string, content string) {
@@ -332,19 +224,6 @@ func assertStorageKinds(t *testing.T, records []ManifestRecord, expected []strin
 	slices.Sort(expected)
 	if !slices.Equal(kinds, expected) {
 		t.Fatalf("StorageKinds = %v, want %v", kinds, expected)
-	}
-}
-
-func assertArtifactPathsInDir(t *testing.T, outputDir string, result ScanResult) {
-	t.Helper()
-	for _, path := range []string{result.DiscoveryPath, result.ManifestPath, result.UnknownItemsPath} {
-		relative, err := filepath.Rel(outputDir, path)
-		if err != nil {
-			t.Fatalf("Rel(%q, %q) error = %v", outputDir, path, err)
-		}
-		if strings.HasPrefix(relative, "..") {
-			t.Fatalf("artifact path escapes output dir: %q", path)
-		}
 	}
 }
 

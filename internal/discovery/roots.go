@@ -11,63 +11,24 @@ import (
 	"time"
 )
 
-func (s *Service) resolveRoots(request ScanRequest) ([]string, error) {
-	candidates := candidateRoots(request, s.userHomeDir)
-	roots := make([]string, 0, len(candidates))
-	seen := map[string]struct{}{}
-	for _, candidate := range candidates {
-		root, err := normalizeRoot(candidate)
-		if err != nil {
-			return nil, err
-		}
-		if root == "" {
-			continue
-		}
-		if _, ok := seen[rootKey(root)]; ok {
-			continue
-		}
-		if err := validateRoot(root); err != nil {
-			return nil, err
-		}
-		seen[rootKey(root)] = struct{}{}
-		roots = append(roots, root)
-	}
-	if len(roots) == 0 {
-		return nil, fmt.Errorf("未找到可扫描目录")
-	}
-	return roots, nil
-}
-
-func candidateRoots(request ScanRequest, userHomeDir func() (string, error)) []string {
-	explicit := explicitRoots(request)
-	if len(explicit) > 0 {
-		return explicit
-	}
-	homeDir, err := userHomeDir()
-	if err != nil || strings.TrimSpace(homeDir) == "" {
-		return nil
-	}
-	return []string{filepath.Join(homeDir, ".codex")}
-}
-
-func explicitRoots(request ScanRequest) []string {
-	roots := []string{}
-	if trimmed := strings.TrimSpace(request.CodexHome); trimmed != "" {
-		roots = append(roots, trimmed)
-	}
-	return append(roots, request.ExtraRoots...)
-}
-
-func normalizeRoot(root string) (string, error) {
-	trimmed := strings.TrimSpace(root)
-	if trimmed == "" {
-		return "", nil
-	}
-	absolute, err := filepath.Abs(trimmed)
+func (s *Service) resolveRoots() ([]string, error) {
+	homeDir, err := s.userHomeDir()
 	if err != nil {
-		return "", fmt.Errorf("解析扫描目录 %q 失败: %w", root, err)
+		return nil, fmt.Errorf("获取用户目录失败: %w", err)
 	}
-	return filepath.Clean(absolute), nil
+	homeDir = strings.TrimSpace(homeDir)
+	if homeDir == "" {
+		return nil, fmt.Errorf("未找到用户目录")
+	}
+	root, err := filepath.Abs(filepath.Join(homeDir, ".codex"))
+	if err != nil {
+		return nil, fmt.Errorf("解析扫描目录失败: %w", err)
+	}
+	root = filepath.Clean(root)
+	if err := validateRoot(root); err != nil {
+		return nil, err
+	}
+	return []string{root}, nil
 }
 
 func validateRoot(root string) error {
@@ -84,78 +45,6 @@ func validateRoot(root string) error {
 	return nil
 }
 
-func rootKey(root string) string {
-	return strings.ToLower(root)
-}
-
-func validateOutputDir(outputDir string, roots []string) error {
-	cleanOutput, err := comparisonPath(outputDir)
-	if err != nil {
-		return fmt.Errorf("resolve output directory %q: %w", outputDir, err)
-	}
-	for _, root := range roots {
-		cleanRoot, err := comparisonPath(root)
-		if err != nil {
-			return fmt.Errorf("解析扫描目录 %q 失败: %w", root, err)
-		}
-		if pathsOverlap(cleanOutput, cleanRoot) {
-			return fmt.Errorf("输出目录不能位于扫描目录内: %s", outputDir)
-		}
-	}
-	return nil
-}
-
-func pathsOverlap(candidate string, root string) bool {
-	left := rootKey(filepath.Clean(candidate))
-	right := rootKey(filepath.Clean(root))
-	if left == right {
-		return true
-	}
-	prefix := right + string(filepath.Separator)
-	return strings.HasPrefix(left, prefix)
-}
-
-func comparisonPath(path string) (string, error) {
-	clean := filepath.Clean(path)
-	resolved, err := filepath.EvalSymlinks(clean)
-	if err == nil {
-		return resolved, nil
-	}
-	if errors.Is(err, os.ErrNotExist) {
-		return resolveParentSymlink(clean)
-	}
-	return "", err
-}
-
-func resolveParentSymlink(path string) (string, error) {
-	current := path
-	suffix := []string{}
-	for {
-		resolved, err := filepath.EvalSymlinks(current)
-		if err == nil {
-			parts := append([]string{resolved}, reverseParts(suffix)...)
-			return filepath.Join(parts...), nil
-		}
-		if !errors.Is(err, os.ErrNotExist) {
-			return "", err
-		}
-		parent := filepath.Dir(current)
-		if parent == current {
-			return path, nil
-		}
-		suffix = append(suffix, filepath.Base(current))
-		current = parent
-	}
-}
-
-func reverseParts(parts []string) []string {
-	reversed := make([]string, 0, len(parts))
-	for index := len(parts) - 1; index >= 0; index-- {
-		reversed = append(reversed, parts[index])
-	}
-	return reversed
-}
-
 func (s *Service) collectItems(roots []string) ([]DiscoveryItem, []UnknownItem, error) {
 	items := make([]DiscoveryItem, 0, len(roots))
 	unknownItems := []UnknownItem{}
@@ -168,16 +57,16 @@ func (s *Service) collectItems(roots []string) ([]DiscoveryItem, []UnknownItem, 
 		unknownItems = append(unknownItems, rootUnknownItems...)
 	}
 	sort.Slice(items, func(i, j int) bool {
-		if items[i].SourceRoot == items[j].SourceRoot {
+		if strings.ToLower(items[i].SourceRoot) == strings.ToLower(items[j].SourceRoot) {
 			return items[i].Path < items[j].Path
 		}
-		return items[i].SourceRoot < items[j].SourceRoot
+		return strings.ToLower(items[i].SourceRoot) < strings.ToLower(items[j].SourceRoot)
 	})
 	sort.Slice(unknownItems, func(i, j int) bool {
-		if unknownItems[i].SourceRoot == unknownItems[j].SourceRoot {
+		if strings.ToLower(unknownItems[i].SourceRoot) == strings.ToLower(unknownItems[j].SourceRoot) {
 			return unknownItems[i].Path < unknownItems[j].Path
 		}
-		return unknownItems[i].SourceRoot < unknownItems[j].SourceRoot
+		return strings.ToLower(unknownItems[i].SourceRoot) < strings.ToLower(unknownItems[j].SourceRoot)
 	})
 	return items, unknownItems, nil
 }

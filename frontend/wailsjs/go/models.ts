@@ -1,23 +1,5 @@
 export namespace main {
 	
-	export class CLISnapshot {
-	    executablePath: string;
-	    available: boolean;
-	    doctorStatus: string;
-	    resumeSupported: boolean;
-	
-	    static createFrom(source: any = {}) {
-	        return new CLISnapshot(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.executablePath = source["executablePath"];
-	        this.available = source["available"];
-	        this.doctorStatus = source["doctorStatus"];
-	        this.resumeSupported = source["resumeSupported"];
-	    }
-	}
 	export class DiscoveryItem {
 	    sourceRoot: string;
 	    path: string;
@@ -44,29 +26,10 @@ export namespace main {
 	        this.target = source["target"];
 	    }
 	}
-	export class ScanRequest {
-	    codexHome: string;
-	    extraRoots: string[];
-	    includeBrowserSidecars: boolean;
-	    outputDir: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new ScanRequest(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.codexHome = source["codexHome"];
-	        this.extraRoots = source["extraRoots"];
-	        this.includeBrowserSidecars = source["includeBrowserSidecars"];
-	        this.outputDir = source["outputDir"];
-	    }
-	}
 	export class ScanSummary {
 	    rootCount: number;
 	    itemCount: number;
 	    unknownCount: number;
-	    warningCount: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new ScanSummary(source);
@@ -77,7 +40,6 @@ export namespace main {
 	        this.rootCount = source["rootCount"];
 	        this.itemCount = source["itemCount"];
 	        this.unknownCount = source["unknownCount"];
-	        this.warningCount = source["warningCount"];
 	    }
 	}
 	export class ScanResult {
@@ -87,9 +49,7 @@ export namespace main {
 	    manifestPath: string;
 	    unknownItemsPath: string;
 	    summary: ScanSummary;
-	    warnings: string[];
 	    items: DiscoveryItem[];
-	    cliSnapshot: CLISnapshot;
 	
 	    static createFrom(source: any = {}) {
 	        return new ScanResult(source);
@@ -103,9 +63,7 @@ export namespace main {
 	        this.manifestPath = source["manifestPath"];
 	        this.unknownItemsPath = source["unknownItemsPath"];
 	        this.summary = this.convertValues(source["summary"], ScanSummary);
-	        this.warnings = source["warnings"];
 	        this.items = this.convertValues(source["items"], DiscoveryItem);
-	        this.cliSnapshot = this.convertValues(source["cliSnapshot"], CLISnapshot);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

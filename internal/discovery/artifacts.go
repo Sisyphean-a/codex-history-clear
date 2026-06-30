@@ -11,44 +11,23 @@ type artifactSet struct {
 	discoveryDoc discoveryDocument
 	manifest     []ManifestRecord
 	unknownItems []UnknownItem
-	doctorJSON   []byte
 }
 
 type discoveryDocument struct {
-	RunID       string               `json:"run_id"`
-	Roots       []string             `json:"roots"`
-	Items       []DiscoveryItem      `json:"items"`
-	CLISnapshot discoveryCLISnapshot `json:"cli_snapshot"`
+	RunID  string          `json:"run_id"`
+	Roots  []string        `json:"roots"`
+	Items  []DiscoveryItem `json:"items"`
 }
 
-type discoveryCLISnapshot struct {
-	DoctorJSONPath  *string `json:"doctor_json_path"`
-	ResumeSupported bool    `json:"resume_supported"`
-}
-
-func buildArtifactSet(runID string, roots []string, items []DiscoveryItem, probe cliProbe) artifactSet {
-	doctorPath := doctorJSONPath(probe)
+func buildArtifactSet(runID string, roots []string, items []DiscoveryItem, unknownItems []UnknownItem) artifactSet {
 	return artifactSet{
 		discoveryDoc: discoveryDocument{
 			RunID: runID,
 			Roots: roots,
 			Items: items,
-			CLISnapshot: discoveryCLISnapshot{
-				DoctorJSONPath:  doctorPath,
-				ResumeSupported: probe.snapshot.ResumeSupported,
-			},
 		},
-		unknownItems: buildUnknownItems(items),
-		doctorJSON:   probe.doctorJSON,
+		unknownItems: append([]UnknownItem(nil), unknownItems...),
 	}
-}
-
-func doctorJSONPath(probe cliProbe) *string {
-	if len(probe.doctorJSON) == 0 {
-		return nil
-	}
-	path := "codex-doctor.json"
-	return &path
 }
 
 func writeArtifacts(outputDir string, artifacts artifactSet) error {
@@ -64,10 +43,7 @@ func writeArtifacts(outputDir string, artifacts artifactSet) error {
 	if err := writeJSON(filepath.Join(outputDir, "unknown-items.json"), artifacts.unknownItems); err != nil {
 		return err
 	}
-	if len(artifacts.doctorJSON) == 0 {
-		return nil
-	}
-	return writeBytes(filepath.Join(outputDir, "codex-doctor.json"), artifacts.doctorJSON)
+	return nil
 }
 
 func newArtifactSet(
@@ -75,15 +51,13 @@ func newArtifactSet(
 	roots []string,
 	items []DiscoveryItem,
 	unknownItems []UnknownItem,
-	probe cliProbe,
 ) (artifactSet, error) {
 	manifest, err := buildManifest(items)
 	if err != nil {
 		return artifactSet{}, err
 	}
-	artifacts := buildArtifactSet(runID, roots, items, probe)
+	artifacts := buildArtifactSet(runID, roots, items, unknownItems)
 	artifacts.manifest = manifest
-	artifacts.unknownItems = append(artifacts.unknownItems, unknownItems...)
 	return artifacts, nil
 }
 

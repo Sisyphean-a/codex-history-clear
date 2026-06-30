@@ -77,19 +77,3 @@ func evidenceFor(kind string) []string {
 		return []string{"sqlite-file"}
 	}
 }
-
-func buildUnknownItems(items []DiscoveryItem) []UnknownItem {
-	unknownItems := []UnknownItem{}
-	for _, item := range items {
-		if _, ok := storageKindFor(item.Kind); ok {
-			continue
-		}
-		unknownItems = append(unknownItems, UnknownItem{
-			SourceRoot: item.SourceRoot,
-			Path:       item.Path,
-			Kind:       item.Kind,
-			Reason:     "not included in manifest-before storage kinds",
-		})
-	}
-	return unknownItems
-}

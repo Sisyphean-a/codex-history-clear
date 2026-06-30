@@ -2,18 +2,10 @@ package main
 
 import "codex-history-manager/internal/discovery"
 
-type ScanRequest struct {
-	CodexHome              string   `json:"codexHome"`
-	ExtraRoots             []string `json:"extraRoots"`
-	IncludeBrowserSidecars bool     `json:"includeBrowserSidecars"`
-	OutputDir              string   `json:"outputDir"`
-}
-
 type ScanSummary struct {
 	RootCount    int `json:"rootCount"`
 	ItemCount    int `json:"itemCount"`
 	UnknownCount int `json:"unknownCount"`
-	WarningCount int `json:"warningCount"`
 }
 
 type DiscoveryItem struct {
@@ -27,13 +19,6 @@ type DiscoveryItem struct {
 	Target     *string  `json:"target"`
 }
 
-type CLISnapshot struct {
-	ExecutablePath  string `json:"executablePath"`
-	Available       bool   `json:"available"`
-	DoctorStatus    string `json:"doctorStatus"`
-	ResumeSupported bool   `json:"resumeSupported"`
-}
-
 type ScanResult struct {
 	RunID            string          `json:"runId"`
 	Roots            []string        `json:"roots"`
@@ -41,18 +26,11 @@ type ScanResult struct {
 	ManifestPath     string          `json:"manifestPath"`
 	UnknownItemsPath string          `json:"unknownItemsPath"`
 	Summary          ScanSummary     `json:"summary"`
-	Warnings         []string        `json:"warnings"`
 	Items            []DiscoveryItem `json:"items"`
-	CLISnapshot      CLISnapshot     `json:"cliSnapshot"`
 }
 
-func (a *App) RunReadOnlyScan(request ScanRequest) (ScanResult, error) {
-	result, err := a.discovery.RunReadOnlyScan(discovery.ScanRequest{
-		CodexHome:              request.CodexHome,
-		ExtraRoots:             request.ExtraRoots,
-		IncludeBrowserSidecars: request.IncludeBrowserSidecars,
-		OutputDir:              request.OutputDir,
-	})
+func (a *App) RunReadOnlyScan() (ScanResult, error) {
+	result, err := a.discovery.RunReadOnlyScan()
 	if err != nil {
 		return ScanResult{}, err
 	}
@@ -85,15 +63,7 @@ func mapScanResult(result discovery.ScanResult) ScanResult {
 			RootCount:    result.Summary.RootCount,
 			ItemCount:    result.Summary.ItemCount,
 			UnknownCount: result.Summary.UnknownCount,
-			WarningCount: result.Summary.WarningCount,
 		},
-		Warnings: result.Warnings,
-		Items:    items,
-		CLISnapshot: CLISnapshot{
-			ExecutablePath:  result.CLISnapshot.ExecutablePath,
-			Available:       result.CLISnapshot.Available,
-			DoctorStatus:    result.CLISnapshot.DoctorStatus,
-			ResumeSupported: result.CLISnapshot.ResumeSupported,
-		},
+		Items: items,
 	}
 }
