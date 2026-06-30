@@ -1,0 +1,64 @@
+feature: 2026-06-30-operator-surface-and-fixtures
+created: 2026-06-30
+
+steps:
+  - action: "编排骨架：建立统一工作区导航和 WorkspaceState"
+    exit_signal: "应用能恢复最近任务状态并切换阶段视图"
+    status: pending
+  - action: "证据整合：接通扫描、计划、执行、验证四类 artifact 与 warning"
+    exit_signal: "工作区能查看各阶段证据与报告入口"
+    status: pending
+  - action: "导出节点：生成 evidence pack 索引与导出动作"
+    exit_signal: "导出后能定位所有关键 artifact 与阶段报告"
+    status: pending
+  - action: "Smoke 节点：建立最小 fixture 数据集和闭环 smoke 流程"
+    exit_signal: "至少一条成功路径和一条错误路径可重放"
+    status: pending
+  - action: "收尾验证：补齐 build / smoke 命令、空态 / 错误态 / 长路径 UI"
+    exit_signal: "主要状态都有截图或 smoke 证据，且 build 可运行"
+    status: pending
+
+checks:
+  - item: "WorkspaceState 只消费真实任务状态与 artifact"
+    source: 名词契约
+    status: pending
+  - item: "evidence pack 只索引现有证据，不生成新真源"
+    source: 流程级约束
+    status: pending
+  - item: "工作区能统一查看扫描、计划、执行、验证四类证据"
+    source: 编排骨架
+    status: pending
+  - item: "fixture smoke 至少覆盖一条成功路径和一条错误路径"
+    source: 验收场景
+    status: pending
+  - item: "空态、错误态、长路径状态在工作区可见"
+    source: 验收场景
+    status: pending
+  - item: "代码中不新增新的 destructive 动作入口"
+    source: 范围守护
+    status: pending
+  - item: "挂载点仅包含统一工作区、导出动作、smoke 夹具和构建入口"
+    source: 挂载点
+    status: pending
+
+dod:
+  commands:
+    - id: CMD-001
+      command: "go test ./..."
+      core: false
+      failure_handling: fix-or-block
+    - id: CMD-002
+      command: "npm --prefix frontend run build"
+      core: true
+      failure_handling: fix-or-block
+    - id: CMD-003
+      command: "wails build -clean"
+      core: true
+      failure_handling: fix-or-block
+    - id: CMD-004
+      command: "go test ./smoke/..."
+      core: true
+      failure_handling: fix-or-block
+  evidence_required: [command_output, json_artifact, screenshot]
+  cleanliness:
+    debug_output: forbidden

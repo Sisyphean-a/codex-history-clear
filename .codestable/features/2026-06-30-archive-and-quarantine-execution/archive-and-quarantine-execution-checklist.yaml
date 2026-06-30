@@ -1,0 +1,60 @@
+feature: 2026-06-30-archive-and-quarantine-execution
+created: 2026-06-30
+
+steps:
+  - action: "编排骨架：建立执行入口、dry-run 分支和结果占位"
+    exit_signal: "能消费 plan 并返回结构完整的 dry-run 预演结果"
+    status: pending
+  - action: "保护节点：实现 approved gate 和敏感文件预检"
+    exit_signal: "未批准计划和受保护对象都会被显式阻断"
+    status: pending
+  - action: "动作节点：实现 archive、quarantine、delete、repair 执行器"
+    exit_signal: "样本 plan 能顺序执行，失败会立即暴露并停止 destructive 分支"
+    status: pending
+  - action: "证据节点：写 rollback / result artifact，并回传 JobEvent"
+    exit_signal: "工作区能看到阶段进度和 artifact 路径"
+    status: pending
+  - action: "验证收尾：补齐执行样本、测试和构建命令"
+    exit_signal: "dry-run、confirmed run 和保护规则都有可复核证据"
+    status: pending
+
+checks:
+  - item: "approved=false 时只能 dry-run"
+    source: 名词契约
+    status: pending
+  - item: "受保护文件命中即阻断 destructive 分支"
+    source: 流程级约束
+    status: pending
+  - item: "前端只通过确认与观察参与执行，不直接删文件"
+    source: 编排骨架
+    status: pending
+  - item: "dry-run 不改动源文件"
+    source: 验收场景
+    status: pending
+  - item: "confirmed run 写 rollback-journal.json 与 exec-result.json"
+    source: 验收场景
+    status: pending
+  - item: "本 feature 不承诺已完成在线备份与执行后复扫"
+    source: 范围守护
+    status: pending
+  - item: "挂载点仅包含执行服务、执行面板、确认对话和 artifact writer"
+    source: 挂载点
+    status: pending
+
+dod:
+  commands:
+    - id: CMD-001
+      command: "go test ./internal/..."
+      core: true
+      failure_handling: fix-or-block
+    - id: CMD-002
+      command: "npm --prefix frontend run build"
+      core: false
+      failure_handling: fix-or-block
+    - id: CMD-003
+      command: "wails build -clean"
+      core: false
+      failure_handling: fix-or-block
+  evidence_required: [command_output, json_artifact, screenshot, diff_summary]
+  cleanliness:
+    debug_output: forbidden

@@ -1,0 +1,60 @@
+feature: 2026-06-30-path-and-project-canonicalization
+created: 2026-06-30
+
+steps:
+  - action: "编排骨架：建立归一化服务入口并消费 manifest 基线"
+    exit_signal: "服务能返回结构完整的 enriched manifest 占位结果"
+    status: pending
+  - action: "计算节点：实现 Win32、WSL、reparse point 的路径归一化"
+    exit_signal: "fixture 覆盖正常路径与关键边界，转换结果稳定"
+    status: pending
+  - action: "证据节点：写 canonical_path、real_path、cwd_norm、reparse_kind"
+    exit_signal: "enriched manifest 能逐条追溯原始路径与转换结果"
+    status: pending
+  - action: "前端接线：展示 alias、unknown 与 project label 标注"
+    exit_signal: "工作区能肉眼区分路径别名与未知状态"
+    status: pending
+  - action: "验证收尾：补齐 fixture、构建入口和 smoke 说明"
+    exit_signal: "必跑命令和样本说明都可执行且无 shim"
+    status: pending
+
+checks:
+  - item: "canonical_path 与 real_path 并存，不允许二选一"
+    source: 名词契约
+    status: pending
+  - item: "未知 reparse point 进入 warning / unknown"
+    source: 流程级约束
+    status: pending
+  - item: "前端只渲染标注结果，不自行推导路径语义"
+    source: 编排骨架
+    status: pending
+  - item: "Win32 / WSL 指向同一工程时 cwd_norm 一致"
+    source: 验收场景
+    status: pending
+  - item: "真实不同文件不会被本 feature 合并"
+    source: 验收场景
+    status: pending
+  - item: "代码中不存在基于 mtime 的保留本判定"
+    source: 范围守护
+    status: pending
+  - item: "挂载点仅包含归一化服务、工作区证据列、夹具目录和 writer"
+    source: 挂载点
+    status: pending
+
+dod:
+  commands:
+    - id: CMD-001
+      command: "go test ./internal/..."
+      core: true
+      failure_handling: fix-or-block
+    - id: CMD-002
+      command: "npm --prefix frontend run build"
+      core: false
+      failure_handling: fix-or-block
+    - id: CMD-003
+      command: "wails build -clean"
+      core: false
+      failure_handling: fix-or-block
+  evidence_required: [command_output, json_artifact, screenshot]
+  cleanliness:
+    debug_output: forbidden

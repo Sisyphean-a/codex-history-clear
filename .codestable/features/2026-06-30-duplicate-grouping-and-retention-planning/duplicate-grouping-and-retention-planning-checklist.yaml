@@ -1,0 +1,60 @@
+feature: 2026-06-30-duplicate-grouping-and-retention-planning
+created: 2026-06-30
+
+steps:
+  - action: "编排骨架：建立分组服务入口并返回结构完整的空计划"
+    exit_signal: "能消费 enriched manifest 并返回 delete plan 占位结果"
+    status: pending
+  - action: "计算节点：实现 duplicate_group 聚类规则"
+    exit_signal: "样本能稳定生成重复组且逻辑/物理重复不混淆"
+    status: pending
+  - action: "决策节点：实现 preferred 选择与 reason code"
+    exit_signal: "每组最多一条 preferred，原因可解释且可复核"
+    status: pending
+  - action: "写入与展示：生成 delete-plan.json 并接通复核工作区"
+    exit_signal: "前端能只读查看计划项、reason 和 warning"
+    status: pending
+  - action: "验证收尾：补齐样本、测试和构建命令"
+    exit_signal: "artifact、截图和必跑命令都可落盘且无 shim"
+    status: pending
+
+checks:
+  - item: "每个 duplicate_group 最多一条 preferred=true"
+    source: 名词契约
+    status: pending
+  - item: "delete-plan.json 初始 approved=false"
+    source: 流程级约束
+    status: pending
+  - item: "前端只读复核，不直接写 delete plan artifact"
+    source: 编排骨架
+    status: pending
+  - item: "证据不足的组进入 review-needed / warning"
+    source: 验收场景
+    status: pending
+  - item: "同一逻辑会话的多入口记录进入同组"
+    source: 验收场景
+    status: pending
+  - item: "浏览器旁路对象不进入默认删除动作"
+    source: 范围守护
+    status: pending
+  - item: "挂载点仅包含 planning 服务、复核页面、writer 和样本目录"
+    source: 挂载点
+    status: pending
+
+dod:
+  commands:
+    - id: CMD-001
+      command: "go test ./internal/..."
+      core: true
+      failure_handling: fix-or-block
+    - id: CMD-002
+      command: "npm --prefix frontend run build"
+      core: false
+      failure_handling: fix-or-block
+    - id: CMD-003
+      command: "wails build -clean"
+      core: false
+      failure_handling: fix-or-block
+  evidence_required: [command_output, json_artifact, screenshot, diff_summary]
+  cleanliness:
+    debug_output: forbidden
