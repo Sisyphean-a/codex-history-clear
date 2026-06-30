@@ -12,7 +12,7 @@ import (
 )
 
 func (s *Service) resolveRoots(request ScanRequest) ([]string, error) {
-	candidates := candidateRoots(request, s.lookupEnv, s.userHomeDir)
+	candidates := candidateRoots(request, s.userHomeDir)
 	roots := make([]string, 0, len(candidates))
 	seen := map[string]struct{}{}
 	for _, candidate := range candidates {
@@ -33,18 +33,15 @@ func (s *Service) resolveRoots(request ScanRequest) ([]string, error) {
 		roots = append(roots, root)
 	}
 	if len(roots) == 0 {
-		return nil, fmt.Errorf("no candidate roots configured")
+		return nil, fmt.Errorf("未找到可扫描目录")
 	}
 	return roots, nil
 }
 
-func candidateRoots(request ScanRequest, lookupEnv func(string) string, userHomeDir func() (string, error)) []string {
+func candidateRoots(request ScanRequest, userHomeDir func() (string, error)) []string {
 	explicit := explicitRoots(request)
 	if len(explicit) > 0 {
 		return explicit
-	}
-	if envHome := strings.TrimSpace(lookupEnv("CODEX_HOME")); envHome != "" {
-		return []string{envHome}
 	}
 	homeDir, err := userHomeDir()
 	if err != nil || strings.TrimSpace(homeDir) == "" {
@@ -68,7 +65,7 @@ func normalizeRoot(root string) (string, error) {
 	}
 	absolute, err := filepath.Abs(trimmed)
 	if err != nil {
-		return "", fmt.Errorf("resolve root %q: %w", root, err)
+		return "", fmt.Errorf("解析扫描目录 %q 失败: %w", root, err)
 	}
 	return filepath.Clean(absolute), nil
 }
@@ -77,12 +74,12 @@ func validateRoot(root string) error {
 	info, err := os.Stat(root)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
-			return fmt.Errorf("candidate root not found: %s", root)
+			return fmt.Errorf("扫描目录不存在: %s", root)
 		}
-		return fmt.Errorf("candidate root unavailable: %s: %w", root, err)
+		return fmt.Errorf("扫描目录不可用: %s: %w", root, err)
 	}
 	if !info.IsDir() {
-		return fmt.Errorf("candidate root is not a directory: %s", root)
+		return fmt.Errorf("扫描目录不是文件夹: %s", root)
 	}
 	return nil
 }
@@ -99,10 +96,10 @@ func validateOutputDir(outputDir string, roots []string) error {
 	for _, root := range roots {
 		cleanRoot, err := comparisonPath(root)
 		if err != nil {
-			return fmt.Errorf("resolve candidate root %q: %w", root, err)
+			return fmt.Errorf("解析扫描目录 %q 失败: %w", root, err)
 		}
 		if pathsOverlap(cleanOutput, cleanRoot) {
-			return fmt.Errorf("output directory must stay outside candidate roots: %s", outputDir)
+			return fmt.Errorf("输出目录不能位于扫描目录内: %s", outputDir)
 		}
 	}
 	return nil

@@ -52,11 +52,13 @@ type UnknownItem struct {
 type ScanSummary struct {
 	RootCount    int
 	ItemCount    int
+	UnknownCount int
 	WarningCount int
 }
 
 type ScanResult struct {
 	RunID            string          `json:"run_id"`
+	Roots            []string        `json:"roots"`
 	DiscoveryPath    string          `json:"discovery_path"`
 	ManifestPath     string          `json:"manifest_path"`
 	UnknownItemsPath string          `json:"unknown_items_path"`

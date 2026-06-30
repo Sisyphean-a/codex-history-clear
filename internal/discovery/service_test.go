@@ -32,7 +32,7 @@ func TestPreviewScanEnumeratesKnownItemsAndCLIState(t *testing.T) {
 		t.Fatalf("RunReadOnlyScan() error = %v", err)
 	}
 
-	if result.Summary != (ScanSummary{RootCount: 1, ItemCount: 9, WarningCount: 0}) {
+	if result.Summary != (ScanSummary{RootCount: 1, ItemCount: 9, UnknownCount: 4, WarningCount: 0}) {
 		t.Fatalf("Summary = %#v", result.Summary)
 	}
 	if result.CLISnapshot.DoctorStatus != "ok" || !result.CLISnapshot.ResumeSupported {
@@ -95,7 +95,7 @@ func TestPreviewScanUsesHomeFallbackAndCLIWarning(t *testing.T) {
 		t.Fatalf("RunReadOnlyScan() error = %v", err)
 	}
 
-	if result.Summary != (ScanSummary{RootCount: 1, ItemCount: 1, WarningCount: 2}) {
+	if result.Summary != (ScanSummary{RootCount: 1, ItemCount: 1, UnknownCount: 0, WarningCount: 2}) {
 		t.Fatalf("Summary = %#v", result.Summary)
 	}
 	if result.CLISnapshot.DoctorStatus != "unavailable" {
@@ -119,7 +119,7 @@ func TestPreviewScanRejectsOutputInsideSourceRoot(t *testing.T) {
 		IncludeBrowserSidecars: true,
 		OutputDir:              filepath.Join(root, "tmp", "runs"),
 	})
-	if err == nil || !strings.Contains(err.Error(), "output directory must stay outside candidate roots") {
+	if err == nil || !strings.Contains(err.Error(), "输出目录不能位于扫描目录内") {
 		t.Fatalf("RunReadOnlyScan() error = %v", err)
 	}
 }
@@ -146,7 +146,7 @@ func TestPreviewScanRejectsPreexistingArtifactTarget(t *testing.T) {
 		IncludeBrowserSidecars: true,
 		OutputDir:              outputDir,
 	})
-	if err == nil || !strings.Contains(err.Error(), "artifact target must not already exist") {
+	if err == nil || !strings.Contains(err.Error(), "输出文件已存在") {
 		t.Fatalf("RunReadOnlyScan() error = %v", err)
 	}
 }
@@ -213,14 +213,14 @@ func TestPreviewScanRejectsMissingRoot(t *testing.T) {
 		IncludeBrowserSidecars: true,
 		OutputDir:              filepath.Join(t.TempDir(), "scan-output"),
 	})
-	if err == nil || !strings.Contains(err.Error(), "candidate root not found") {
+	if err == nil || !strings.Contains(err.Error(), "扫描目录不存在") {
 		t.Fatalf("RunReadOnlyScan() error = %v", err)
 	}
 }
 
 func TestValidateRootPreservesUnexpectedStatErrors(t *testing.T) {
 	err := validateRoot(string([]byte{0}))
-	if err == nil || !strings.Contains(err.Error(), "candidate root unavailable") {
+	if err == nil || !strings.Contains(err.Error(), "扫描目录不可用") {
 		t.Fatalf("validateRoot() error = %v", err)
 	}
 }
@@ -264,7 +264,6 @@ type commandResult struct {
 func newTestService() *Service {
 	service := NewService()
 	service.now = func() time.Time { return time.Date(2026, 6, 30, 7, 8, 9, 0, time.UTC) }
-	service.lookupEnv = func(string) string { return "" }
 	return service
 }
 

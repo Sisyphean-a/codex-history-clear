@@ -65,6 +65,7 @@ export namespace main {
 	export class ScanSummary {
 	    rootCount: number;
 	    itemCount: number;
+	    unknownCount: number;
 	    warningCount: number;
 	
 	    static createFrom(source: any = {}) {
@@ -75,11 +76,13 @@ export namespace main {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.rootCount = source["rootCount"];
 	        this.itemCount = source["itemCount"];
+	        this.unknownCount = source["unknownCount"];
 	        this.warningCount = source["warningCount"];
 	    }
 	}
 	export class ScanResult {
 	    runId: string;
+	    roots: string[];
 	    discoveryPath: string;
 	    manifestPath: string;
 	    unknownItemsPath: string;
@@ -95,6 +98,7 @@ export namespace main {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.runId = source["runId"];
+	        this.roots = source["roots"];
 	        this.discoveryPath = source["discoveryPath"];
 	        this.manifestPath = source["manifestPath"];
 	        this.unknownItemsPath = source["unknownItemsPath"];

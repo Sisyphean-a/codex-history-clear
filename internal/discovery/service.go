@@ -11,7 +11,6 @@ import (
 
 type Service struct {
 	now         func() time.Time
-	lookupEnv   func(string) string
 	userHomeDir func() (string, error)
 	lookPath    func(string) (string, error)
 	runCommand  func(time.Duration, string, ...string) (string, error)
@@ -20,7 +19,6 @@ type Service struct {
 func NewService() *Service {
 	return &Service{
 		now:         time.Now,
-		lookupEnv:   os.Getenv,
 		userHomeDir: os.UserHomeDir,
 		lookPath:    exec.LookPath,
 		runCommand:  runCombinedCommand,
@@ -57,10 +55,11 @@ func (s *Service) RunReadOnlyScan(request ScanRequest) (ScanResult, error) {
 
 	return ScanResult{
 		RunID:            runID,
+		Roots:            append([]string(nil), roots...),
 		DiscoveryPath:    filepath.Join(outputDir, "discovery.json"),
 		ManifestPath:     filepath.Join(outputDir, "manifest-before.json"),
 		UnknownItemsPath: filepath.Join(outputDir, "unknown-items.json"),
-		Summary:          scanSummary(roots, items, probe.warnings),
+		Summary:          scanSummary(roots, items, len(artifacts.unknownItems), probe.warnings),
 		Warnings:         probe.warnings,
 		Items:            items,
 		CLISnapshot:      probe.snapshot,
@@ -70,15 +69,21 @@ func (s *Service) RunReadOnlyScan(request ScanRequest) (ScanResult, error) {
 func resolveOutputDir(outputDir string, runID string) (string, error) {
 	candidate := strings.TrimSpace(outputDir)
 	if candidate == "" {
-		candidate = filepath.Join("tmp", "runs", runID)
+		candidate = filepath.Join(os.TempDir(), "codex-history-manager", "runs", runID)
 	}
 	return filepath.Abs(filepath.Clean(candidate))
 }
 
-func scanSummary(roots []string, items []DiscoveryItem, warnings []string) ScanSummary {
+func scanSummary(
+	roots []string,
+	items []DiscoveryItem,
+	unknownCount int,
+	warnings []string,
+) ScanSummary {
 	return ScanSummary{
 		RootCount:    len(roots),
 		ItemCount:    len(items),
+		UnknownCount: unknownCount,
 		WarningCount: len(warnings),
 	}
 }

@@ -17,7 +17,7 @@ func main() {
 
 	// Create application with options
 	err := wails.Run(&options.App{
-		Title:  "codex-history-manager",
+		Title:  "Codex 历史清理",
 		Width:  1024,
 		Height: 768,
 		AssetServer: &assetserver.Options{

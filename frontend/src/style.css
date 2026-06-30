@@ -1,7 +1,7 @@
 :root {
-    color: #f3efe4;
-    background: #0b0e14;
-    font-family: "Bahnschrift", "Trebuchet MS", sans-serif;
+    color: #0f172a;
+    background: #f8fafc;
+    font-family: "Fira Sans", "Segoe UI", sans-serif;
     font-synthesis: none;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
@@ -21,6 +21,7 @@ body,
 
 body {
     min-height: 100vh;
+    margin: 0;
 }
 
 button,

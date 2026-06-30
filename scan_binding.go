@@ -12,6 +12,7 @@ type ScanRequest struct {
 type ScanSummary struct {
 	RootCount    int `json:"rootCount"`
 	ItemCount    int `json:"itemCount"`
+	UnknownCount int `json:"unknownCount"`
 	WarningCount int `json:"warningCount"`
 }
 
@@ -35,6 +36,7 @@ type CLISnapshot struct {
 
 type ScanResult struct {
 	RunID            string          `json:"runId"`
+	Roots            []string        `json:"roots"`
 	DiscoveryPath    string          `json:"discoveryPath"`
 	ManifestPath     string          `json:"manifestPath"`
 	UnknownItemsPath string          `json:"unknownItemsPath"`
@@ -75,12 +77,14 @@ func mapScanResult(result discovery.ScanResult) ScanResult {
 
 	return ScanResult{
 		RunID:            result.RunID,
+		Roots:            append([]string(nil), result.Roots...),
 		DiscoveryPath:    result.DiscoveryPath,
 		ManifestPath:     result.ManifestPath,
 		UnknownItemsPath: result.UnknownItemsPath,
 		Summary: ScanSummary{
 			RootCount:    result.Summary.RootCount,
 			ItemCount:    result.Summary.ItemCount,
+			UnknownCount: result.Summary.UnknownCount,
 			WarningCount: result.Summary.WarningCount,
 		},
 		Warnings: result.Warnings,

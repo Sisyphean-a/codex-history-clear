@@ -100,7 +100,7 @@ func writeBytes(path string, data []byte) error {
 	file, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o644)
 	if err != nil {
 		if os.IsExist(err) {
-			return fmt.Errorf("artifact target must not already exist: %s", path)
+			return fmt.Errorf("输出文件已存在: %s", path)
 		}
 		return err
 	}
