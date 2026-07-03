@@ -22,6 +22,10 @@ export function ExportHistoryEvidencePack(arg1) {
   return window['go']['main']['App']['ExportHistoryEvidencePack'](arg1);
 }
 
+export function GetCleanupWorkspaceConfig() {
+  return window['go']['main']['App']['GetCleanupWorkspaceConfig']();
+}
+
 export function ListHistoryThreads(arg1) {
   return window['go']['main']['App']['ListHistoryThreads'](arg1);
 }
@@ -32,4 +36,8 @@ export function RollbackHistoryDelete(arg1) {
 
 export function RunReadOnlyScan() {
   return window['go']['main']['App']['RunReadOnlyScan']();
+}
+
+export function SetCleanupWorkspaceRoot(arg1) {
+  return window['go']['main']['App']['SetCleanupWorkspaceRoot'](arg1);
 }

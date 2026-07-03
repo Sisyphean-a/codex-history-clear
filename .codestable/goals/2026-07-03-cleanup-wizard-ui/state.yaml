@@ -1,0 +1,25 @@
+schema_version: 1
+goal: "cleanup-wizard-ui"
+status: complete
+objective: "按重构文档将 Codex History Manager 前端主界面改造成安全清理向导，保留现有后端删除、备份、回滚和证据能力，并在完成后移除重构文档"
+start_point: "当前桌面前端分成只读扫描预览和真实历史删除两块，主流程偏工程台；缺少用户向导式入口、策略选择、按时间/大小筛选和面向人的计划摘要。"
+acceptance:
+  - "顶部区域改成 Codex 历史清理器，并清楚展示当前扫描目录、扫描入口和辅助入口"
+  - "主界面改成左侧策略栏加右侧会话列表/计划预览的安全清理向导"
+  - "会话列表支持按时间、归档状态、项目目录和大小筛选，并显示面向用户的状态标签"
+  - "删除前确认口令改为 CLEAN，保留只备份、确认并清理、回滚和高级详情能力"
+  - "现有 discovery、manifest、rollback、evidence 等工程细节默认折叠到高级详情中"
+  - "前端构建和相关 Go 测试通过，重构文档被移除"
+non_goals:
+  - "不删除或弱化现有后端删除、备份、回滚、证据导出能力"
+  - "不扩展到云端同步、账号体系或跨平台交付"
+  - "不重写核心历史删除链路的数据模型"
+budget:
+  kind: none
+  limit: null
+current_iteration: 1
+next_action: "goal 已完成，无后续动作。"
+blocker_signature: null
+blocker_count: 0
+owner_stop: null
+updated_at: "2026-07-03"

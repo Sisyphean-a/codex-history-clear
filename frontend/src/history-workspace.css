@@ -1,48 +1,196 @@
-.筛选网格 {
+.向导壳,
+.策略栏,
+.主内容列,
+.会话区,
+.计划区,
+.高级网格 {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+    gap: 14px;
+}
+
+.向导顶部,
+.目录条,
+.顶栏动作,
+.会话元信息 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.向导顶部 {
+    padding: 18px;
+    border: 1px solid rgba(141, 175, 168, 0.35);
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.88);
+    box-shadow: 0 16px 44px rgba(18, 56, 60, 0.08);
+    backdrop-filter: blur(10px);
+}
+
+.标题区 {
+    display: grid;
     gap: 10px;
 }
 
-.字段 {
+.标题区 h1 {
+    margin: 0;
+    font-size: 30px;
+    line-height: 1.05;
+}
+
+.标题区 p,
+.策略项 small,
+.会话目录,
+.会话元信息 {
+    color: #56747a;
+}
+
+.目录条 {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    font-size: 13px;
+}
+
+.顶栏动作 {
+    grid-auto-flow: column;
+    justify-content: start;
+}
+
+.总览网格 {
     display: grid;
-    gap: 6px;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 12px;
 }
 
-.字段 span,
-.勾选项 span,
-.路径提示 {
-    color: #5d7488;
-    font-size: 12px;
+.内容栅格 {
+    display: grid;
+    grid-template-columns: minmax(300px, 360px) minmax(0, 1fr);
+    gap: 16px;
+    align-items: start;
 }
 
-.输入 {
-    width: 100%;
-    min-height: 38px;
-    padding: 0 12px;
-    border: 1px solid #d7e1ea;
-    border-radius: 12px;
-    background: #fbfdff;
-    color: #10233a;
+.策略组 {
+    display: grid;
+    gap: 10px;
 }
 
-.勾选项 {
-    display: inline-flex;
-    align-items: center;
+.策略项 {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 10px;
+    align-items: start;
+    padding: 12px;
+    border-radius: 16px;
+    background: #f7fbfa;
+}
+
+.策略项 strong {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 14px;
+}
+
+.会话列表 {
+    max-height: 430px;
+    overflow: auto;
+}
+
+.会话卡 {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 12px;
+    padding: 14px;
+    border: 1px solid #dce8e4;
+    border-radius: 18px;
+    background: #fbfefd;
+}
+
+.会话卡.选中 {
+    border-color: #0f766e;
+    box-shadow: inset 0 0 0 1px rgba(15, 118, 110, 0.22);
+}
+
+.会话主体,
+.标签列,
+.摘要列 {
+    display: grid;
     gap: 8px;
 }
 
-.危险提示 {
-    padding: 10px 12px;
-    border: 1px solid #f4d4aa;
-    border-radius: 12px;
-    background: #fff8ef;
-    color: #9a5a10;
+.会话目录 {
+    overflow-wrap: anywhere;
+    font-size: 13px;
+}
+
+.会话元信息 {
+    justify-content: flex-start;
+    flex-wrap: wrap;
     font-size: 12px;
 }
 
+.标签列 {
+    grid-template-columns: repeat(auto-fit, minmax(96px, max-content));
+}
+
+.危险提示,
+.执行提示 {
+    padding: 12px 14px;
+    border-radius: 16px;
+}
+
+.危险提示 {
+    border: 1px solid #f1d3a6;
+    background: #fff8ef;
+    color: #9b5d0d;
+}
+
+.执行提示 {
+    border: 1px solid #b7e2d8;
+    background: #edf9f5;
+}
+
+.摘要列 {
+    margin: 0;
+    padding-left: 18px;
+}
+
+.高级折叠 summary {
+    cursor: pointer;
+    font-weight: 700;
+}
+
+.高级网格 {
+    margin-top: 14px;
+}
+
+.会话区,
+.计划区 {
+    min-height: 0;
+}
+
+.高级网格 > .面板 {
+    min-width: 0;
+}
+
 @media (max-width: 1200px) {
-    .筛选网格 {
+    .总览网格 {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .内容栅格 {
         grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 760px) {
+    .向导顶部,
+    .顶栏动作 {
+        align-items: stretch;
+        grid-auto-flow: row;
+        display: grid;
+    }
+
+    .总览网格 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }

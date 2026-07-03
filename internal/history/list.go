@@ -3,8 +3,14 @@ package history
 import (
 	"database/sql"
 	"fmt"
+	"os"
 	"strings"
 	"time"
+)
+
+const (
+	defaultListLimit   = 80
+	unlimitedListLimit = int(^uint(0) >> 1)
 )
 
 type threadRow struct {
@@ -47,7 +53,7 @@ func listThreads(paths codexPaths, request ListRequest) ([]ThreadSummary, int, e
 		if err != nil {
 			return nil, 0, err
 		}
-		thread := mapThreadRow(row, sessionIndex)
+		thread := mapThreadRow(paths, row, sessionIndex)
 		if !matchesGrep(thread, request.Grep) {
 			continue
 		}
@@ -111,7 +117,7 @@ func resolveTarget(paths codexPaths, threadID string) (ThreadSummary, error) {
 		if err != nil {
 			return ThreadSummary{}, err
 		}
-		matches = append(matches, mapThreadRow(row, sessionIndex))
+		matches = append(matches, mapThreadRow(paths, row, sessionIndex))
 	}
 	if err := rows.Err(); err != nil {
 		return ThreadSummary{}, err
@@ -169,7 +175,7 @@ func scanThreadRow(rows *sql.Rows) (threadRow, error) {
 	return row, err
 }
 
-func mapThreadRow(row threadRow, sessionIndex map[string]sessionIndexEntry) ThreadSummary {
+func mapThreadRow(paths codexPaths, row threadRow, sessionIndex map[string]sessionIndexEntry) ThreadSummary {
 	title := row.Title
 	sourceTitle := row.Title
 	if entry, ok := sessionIndex[row.ID]; ok && entry.ThreadName != "" {
@@ -184,9 +190,26 @@ func mapThreadRow(row threadRow, sessionIndex map[string]sessionIndexEntry) Thre
 		UpdatedAt:        formatUnix(row.UpdatedAtMS, row.UpdatedAt),
 		CWD:              strings.TrimPrefix(row.CWD, `\\?\`),
 		Archived:         row.Archived == 1,
+		SizeBytes:        estimateThreadSize(paths, row),
 		FirstUserMessage: row.FirstUserMessage.String,
 		Preview:          row.Preview.String,
 	}
+}
+
+func estimateThreadSize(paths codexPaths, row threadRow) int64 {
+	size := fileSize(row.RolloutPath)
+	for _, snapshot := range findShellSnapshots(paths.shellSnapshotsDir, row.ID) {
+		size += fileSize(snapshot)
+	}
+	return size
+}
+
+func fileSize(path string) int64 {
+	info, err := os.Stat(path)
+	if err != nil {
+		return 0
+	}
+	return info.Size()
 }
 
 func matchesGrep(thread ThreadSummary, grep string) bool {
@@ -204,10 +227,13 @@ func matchesGrep(thread ThreadSummary, grep string) bool {
 }
 
 func effectiveLimit(value int) int {
+	if value < 0 {
+		return unlimitedListLimit
+	}
 	if value > 0 {
 		return value
 	}
-	return 80
+	return defaultListLimit
 }
 
 func formatUnix(ms sql.NullInt64, seconds int64) string {

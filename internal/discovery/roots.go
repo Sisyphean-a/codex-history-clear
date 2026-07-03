@@ -9,23 +9,13 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	"codex-history-manager/internal/codexhome"
 )
 
 func (s *Service) resolveRoots() ([]string, error) {
-	homeDir, err := s.userHomeDir()
+	root, err := codexhome.Resolve(s.codexHomeOverride, s.userHomeDir, "扫描目录")
 	if err != nil {
-		return nil, fmt.Errorf("获取用户目录失败: %w", err)
-	}
-	homeDir = strings.TrimSpace(homeDir)
-	if homeDir == "" {
-		return nil, fmt.Errorf("未找到用户目录")
-	}
-	root, err := filepath.Abs(filepath.Join(homeDir, ".codex"))
-	if err != nil {
-		return nil, fmt.Errorf("解析扫描目录失败: %w", err)
-	}
-	root = filepath.Clean(root)
-	if err := validateRoot(root); err != nil {
 		return nil, err
 	}
 	return []string{root}, nil

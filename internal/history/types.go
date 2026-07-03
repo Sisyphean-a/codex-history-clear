@@ -17,6 +17,7 @@ type ThreadSummary struct {
 	UpdatedAt        string `json:"updatedAt"`
 	CWD              string `json:"cwd"`
 	Archived         bool   `json:"archived"`
+	SizeBytes        int64  `json:"sizeBytes"`
 	FirstUserMessage string `json:"firstUserMessage"`
 	Preview          string `json:"preview"`
 }
@@ -93,6 +94,7 @@ type ExecuteRequest struct {
 	PlanPath   string `json:"planPath"`
 	Confirmed  bool   `json:"confirmed"`
 	BackupOnly bool   `json:"backupOnly"`
+	SkipBackup bool   `json:"skipBackup"`
 }
 
 type BackupArtifact struct {

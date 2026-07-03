@@ -33,6 +33,9 @@ func executeDeletePlan(paths codexPaths, request ExecuteRequest, newDiscovery fu
 	}
 	mutations, verification, runErr := runExecutionPipeline(paths, preparation.document, preparation.outputDir, &events, newDiscovery)
 	if runErr != nil {
+		if preparation.journalPath == "" {
+			return ExecuteResult{}, runErr
+		}
 		rollbackEvents, rollbackErr := restoreBackups(preparation.journalPath)
 		events = append(events, rollbackEvents...)
 		if rollbackErr != nil {
@@ -57,7 +60,7 @@ func prepareExecution(request ExecuteRequest) (executionPreparation, error) {
 	if err := assertInactiveTargets(document.Targets); err != nil {
 		return executionPreparation{}, err
 	}
-	return writeExecutionPreparation(request.PlanPath, document, false)
+	return writeExecutionPreparation(request.PlanPath, document, false, request.BackupOnly || !request.SkipBackup)
 }
 
 func assertInactiveTargets(targets []PlanTarget) error {
@@ -69,15 +72,21 @@ func assertInactiveTargets(targets []PlanTarget) error {
 	return nil
 }
 
-func writeExecutionPreparation(planPath string, document planDocument, rewritePlan bool) (executionPreparation, error) {
+func writeExecutionPreparation(planPath string, document planDocument, rewritePlan bool, createBackup bool) (executionPreparation, error) {
 	outputDir := filepath.Dir(planPath)
-	backups, journal, err := createBackups(outputDir, document)
-	if err != nil {
-		return executionPreparation{}, err
-	}
-	journalPath := filepath.Join(outputDir, "rollback-journal.json")
-	if err := writeJSON(journalPath, journal); err != nil {
-		return executionPreparation{}, err
+	backups := []BackupArtifact{}
+	journalPath := ""
+	var err error
+	if createBackup {
+		var journal rollbackJournal
+		backups, journal, err = createBackups(outputDir, document)
+		if err != nil {
+			return executionPreparation{}, err
+		}
+		journalPath = filepath.Join(outputDir, "rollback-journal.json")
+		if err := writeJSON(journalPath, journal); err != nil {
+			return executionPreparation{}, err
+		}
 	}
 	approvedPlanPath := planPath
 	if rewritePlan {

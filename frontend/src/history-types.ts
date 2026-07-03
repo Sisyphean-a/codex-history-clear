@@ -7,8 +7,15 @@ export type HistoryThread = {
     updatedAt: string;
     cwd: string;
     archived: boolean;
+    sizeBytes: number;
     firstUserMessage: string;
     preview: string;
+};
+
+export type CleanupWorkspaceConfig = {
+    codexHome: string;
+    backupRoot: string;
+    usingDefault: boolean;
 };
 
 export type HistoryListResult = {

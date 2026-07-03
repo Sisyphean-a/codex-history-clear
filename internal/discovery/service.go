@@ -8,15 +8,21 @@ import (
 )
 
 type Service struct {
-	now         func() time.Time
-	userHomeDir func() (string, error)
+	now               func() time.Time
+	userHomeDir       func() (string, error)
+	codexHomeOverride string
 }
 
 func NewService() *Service {
 	return &Service{
-		now:         time.Now,
-		userHomeDir: os.UserHomeDir,
+		now:               time.Now,
+		userHomeDir:       os.UserHomeDir,
+		codexHomeOverride: "",
 	}
+}
+
+func (s *Service) SetCodexHomeOverride(root string) {
+	s.codexHomeOverride = root
 }
 
 func (s *Service) RunReadOnlyScan() (ScanResult, error) {

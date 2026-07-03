@@ -1,193 +1,194 @@
 .工作台 {
     min-height: 100vh;
-    padding: 14px;
+    padding: 18px;
     background:
-        radial-gradient(circle at top right, rgba(15, 118, 110, 0.08), transparent 24%),
-        linear-gradient(180deg, #f4f7fb 0%, #eef3f9 100%);
-    color: #10233a;
+        radial-gradient(circle at top left, rgba(15, 118, 110, 0.12), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(13, 148, 136, 0.08), transparent 24%),
+        linear-gradient(180deg, #f6fbfa 0%, #edf5f4 100%);
+    color: #16323b;
 }
 
-.顶栏 {
+.数据列,
+.操作列,
+.结果区,
+.组列表 {
+    display: grid;
+    gap: 14px;
+}
+
+.面板头,
+.组头,
+.会话头 {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 14px;
-    margin-bottom: 14px;
-    padding: 12px 14px;
-    border: 1px solid #d4dde8;
-    border-radius: 16px;
-    background: rgba(255, 255, 255, 0.92);
-    box-shadow: 0 14px 36px rgba(16, 35, 58, 0.08);
+    gap: 12px;
+}
+
+.面板,
+.指标卡,
+.组卡,
+.高级折叠 {
+    border: 1px solid rgba(141, 175, 168, 0.35);
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.88);
+    box-shadow: 0 16px 44px rgba(18, 56, 60, 0.08);
     backdrop-filter: blur(10px);
 }
 
-.标题区 h1 {
+.面板,
+.高级折叠 {
+    padding: 18px;
+}
+
+.面板头 h2 {
     margin: 0;
-    font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
-    font-size: 18px;
-    line-height: 1.2;
 }
 
-.次信息 {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-top: 8px;
+.数据行 span,
+.路径提示 {
+    color: #56747a;
 }
 
-.次信息 span,
-.状态签 {
-    display: inline-flex;
-    align-items: center;
-    min-height: 24px;
-    padding: 0 8px;
-    border-radius: 999px;
-    font-size: 12px;
-    font-weight: 600;
+.目录条 code,
+.数据行 code,
+.路径列 code {
+    padding: 4px 8px;
+    border-radius: 10px;
+    background: #eef7f5;
+    overflow-wrap: anywhere;
+    font-family: "IBM Plex Mono", "Fira Code", monospace;
 }
 
-.次信息 span,
-.状态签.neutral {
-    border: 1px solid #d7e1ea;
-    background: #f7fafc;
-    color: #486074;
-}
-
-.状态签.accent {
-    border: 1px solid #8dd3c7;
-    background: #e8fbf7;
-    color: #0f766e;
-}
-
-.状态签.warn {
-    border: 1px solid #f4c98d;
-    background: #fff7e8;
-    color: #b45309;
-}
-
-.主按钮 {
-    min-width: 160px;
-    height: 40px;
-    border: 1px solid #0f766e;
-    border-radius: 12px;
-    background: linear-gradient(135deg, #0f766e 0%, #0b5f67 100%);
-    color: #ffffff;
-    font-weight: 700;
-    cursor: pointer;
-    transition: transform 140ms ease, opacity 140ms ease;
-}
-
-.主按钮:hover:enabled {
-    transform: translateY(-1px);
-}
-
-.主按钮:disabled {
-    cursor: progress;
-    opacity: 0.72;
-}
-
-.次按钮 {
-    min-width: 140px;
-    height: 38px;
-    border: 1px solid #c8d7e6;
-    border-radius: 12px;
-    background: #f8fbfe;
-    color: #23425d;
-    font-weight: 700;
-    cursor: pointer;
-}
-
-.次按钮:disabled {
-    cursor: progress;
-    opacity: 0.72;
-}
-
-.结果区 {
-    display: grid;
-    gap: 12px;
-}
-
-.功能列,
-.功能卡,
-.内层面板 {
-    display: grid;
-    gap: 12px;
+.操作列 {
+    grid-auto-flow: column;
+    justify-content: start;
 }
 
 .指标网格 {
     display: grid;
     grid-template-columns: repeat(6, minmax(0, 1fr));
-    gap: 10px;
-}
-
-.指标网格.三列 {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.指标卡,
-.面板,
-.组卡 {
-    border: 1px solid #d4dde8;
-    border-radius: 16px;
-    background: rgba(255, 255, 255, 0.94);
-    box-shadow: 0 10px 28px rgba(16, 35, 58, 0.05);
+    gap: 12px;
 }
 
 .指标卡 {
-    padding: 11px 12px;
+    padding: 14px 16px;
 }
 
 .指标名 {
     display: block;
-    color: #5d7488;
     font-size: 12px;
+    color: #63828a;
 }
 
 .指标值 {
     display: block;
-    margin-top: 9px;
-    font-family: "IBM Plex Mono", "Fira Code", monospace;
+    margin-top: 10px;
     font-size: 24px;
     line-height: 1;
 }
 
+.字段 {
+    display: grid;
+    gap: 10px;
+}
+
+.输入 {
+    width: 100%;
+    min-height: 42px;
+    padding: 0 14px;
+    border: 1px solid #d5e3df;
+    border-radius: 14px;
+    background: #fcfffe;
+    color: #16323b;
+}
+
+.主按钮,
+.次按钮 {
+    min-height: 42px;
+    padding: 0 16px;
+    border-radius: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 140ms ease, opacity 140ms ease, box-shadow 140ms ease;
+}
+
+.主按钮 {
+    border: 1px solid #0f766e;
+    background: linear-gradient(135deg, #0f766e 0%, #115e59 100%);
+    color: #fff;
+    box-shadow: 0 12px 24px rgba(15, 118, 110, 0.22);
+}
+
+.次按钮 {
+    border: 1px solid #cde0db;
+    background: #f7fbfa;
+    color: #21505a;
+}
+
+.主按钮:hover:enabled,
+.次按钮:hover:enabled {
+    transform: translateY(-1px);
+}
+
+.主按钮:disabled,
+.次按钮:disabled {
+    cursor: progress;
+    opacity: 0.68;
+}
+
 .双栏 {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: 12px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
 }
 
-.面板 {
-    padding: 12px;
-}
-
-.面板头,
-.组头 {
+.次信息 {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    margin-bottom: 10px;
-}
-
-.面板头 h2 {
-    margin: 0;
-    font-size: 13px;
-    color: #486074;
-}
-
-.数据列,
-.告警列,
-.组列表 {
-    display: grid;
+    flex-wrap: wrap;
     gap: 8px;
 }
 
-.操作列 {
-    display: flex;
-    flex-wrap: wrap;
+.状态签 {
+    display: inline-flex;
     align-items: center;
-    gap: 10px;
+    min-height: 26px;
+    padding: 0 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.次信息 span,
+.状态签.neutral {
+    border: 1px solid #d7e5e0;
+    background: #f7fbfa;
+    color: #5a757c;
+}
+
+.状态签.accent {
+    border: 1px solid #89d4c4;
+    background: #e5fbf5;
+    color: #0f766e;
+}
+
+.状态签.warn {
+    border: 1px solid #efc890;
+    background: #fff7e8;
+    color: #a35d06;
+}
+
+.告警项 {
+    border: 1px solid #f1d3a6;
+    color: #9b5d0d;
+    padding: 12px 14px;
+    border-radius: 16px;
+    background: #fff8ef;
+}
+
+.告警列 {
+    display: grid;
+    gap: 8px;
 }
 
 .数据行 {
@@ -195,41 +196,12 @@
     grid-template-columns: 92px minmax(0, 1fr);
     gap: 10px;
     align-items: start;
-    padding: 7px 0;
-    border-top: 1px solid #edf2f7;
-}
-
-.数据行:first-child {
-    border-top: none;
-    padding-top: 0;
-}
-
-.数据行 span {
-    color: #5d7488;
-    font-size: 12px;
-}
-
-.数据行 code,
-.路径列 code {
-    overflow-wrap: anywhere;
-    font-family: "IBM Plex Mono", "Fira Code", monospace;
-    font-size: 12px;
-    color: #10233a;
-}
-
-.告警项 {
-    padding: 8px 10px;
-    border: 1px solid #f4d4aa;
-    border-radius: 12px;
-    background: #fff9ef;
-    color: #9a5a10;
-    font-size: 12px;
 }
 
 .表格壳 {
     overflow: auto;
-    border: 1px solid #e6edf4;
-    border-radius: 12px;
+    border: 1px solid #e4efec;
+    border-radius: 16px;
 }
 
 .结果表格 {
@@ -240,8 +212,8 @@
 
 .结果表格 th,
 .结果表格 td {
-    padding: 9px 10px;
-    border-bottom: 1px solid #edf2f7;
+    padding: 10px 12px;
+    border-bottom: 1px solid #edf4f2;
     text-align: left;
     vertical-align: top;
     font-size: 12px;
@@ -250,40 +222,41 @@
 .结果表格 th {
     position: sticky;
     top: 0;
-    background: #f8fbfd;
-    color: #486074;
-    font-weight: 700;
-}
-
-.结果表格 tbody tr:hover {
-    background: #f7fbfb;
+    background: #f7fbfa;
+    color: #557179;
 }
 
 .候选主值 {
     font-weight: 700;
-    color: #10233a;
 }
 
 .候选副值 {
     margin-top: 4px;
     overflow-wrap: anywhere;
-    color: #5d7488;
+    color: #5a757c;
     font-size: 12px;
 }
 
 .组卡 {
-    padding: 10px;
+    padding: 12px;
+}
+
+.指标网格.三列 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .空态,
 .错误面板 {
     display: grid;
     place-items: center;
-    min-height: 170px;
-    border: 1px dashed #c9d4df;
-    border-radius: 16px;
-    background: rgba(255, 255, 255, 0.9);
-    color: #5d7488;
+    min-height: 140px;
+    border-radius: 18px;
+}
+
+.空态 {
+    border: 1px dashed #cad9d5;
+    background: rgba(255, 255, 255, 0.7);
+    color: #6a848a;
 }
 
 .空态.小号 {
@@ -291,11 +264,10 @@
 }
 
 .错误面板 {
-    padding: 16px;
-    place-items: start;
-    color: #991b1b;
-    border-color: #f3c4c4;
-    background: #fff6f6;
+    border: 1px solid #f3c4c4;
+    background: #fff4f4;
+    color: #9a1d1d;
+    padding: 18px;
 }
 
 @media (max-width: 1200px) {
@@ -310,16 +282,14 @@
 
 @media (max-width: 760px) {
     .工作台 {
-        padding: 10px;
+        padding: 12px;
     }
 
-    .顶栏 {
-        flex-direction: column;
+    .面板头,
+    .操作列 {
         align-items: stretch;
-    }
-
-    .主按钮 {
-        width: 100%;
+        grid-auto-flow: row;
+        display: grid;
     }
 
     .指标网格 {
@@ -328,6 +298,5 @@
 
     .数据行 {
         grid-template-columns: 1fr;
-        gap: 4px;
     }
 }

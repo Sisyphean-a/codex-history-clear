@@ -17,6 +17,24 @@ func TestListThreadsMergesSessionIndexTitle(t *testing.T) {
 	}
 }
 
+func TestListThreadsWithoutLimitReturnsAll(t *testing.T) {
+	service := newFixtureService(t)
+
+	result, err := service.ListThreads(ListRequest{Limit: -1})
+	if err != nil {
+		t.Fatalf("ListThreads() error = %v", err)
+	}
+	if len(result.Items) != 2 {
+		t.Fatalf("ListThreads() count = %d", len(result.Items))
+	}
+	if result.Summary.HasMore {
+		t.Fatalf("ListThreads() hasMore = true")
+	}
+	if result.Summary.Limit != len(result.Items) {
+		t.Fatalf("ListThreads() limit = %d", result.Summary.Limit)
+	}
+}
+
 func TestBuildDeletePlanCreatesArtifact(t *testing.T) {
 	service := newFixtureService(t)
 

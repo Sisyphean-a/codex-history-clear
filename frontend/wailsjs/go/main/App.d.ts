@@ -13,8 +13,12 @@ export function ExecuteHistoryDeletePlan(arg1:history.ExecuteRequest):Promise<hi
 
 export function ExportHistoryEvidencePack(arg1:history.EvidencePackRequest):Promise<history.EvidencePackResult>;
 
+export function GetCleanupWorkspaceConfig():Promise<main.CleanupWorkspaceConfig>;
+
 export function ListHistoryThreads(arg1:history.ListRequest):Promise<history.ListResult>;
 
 export function RollbackHistoryDelete(arg1:history.RollbackRequest):Promise<history.RollbackResult>;
 
 export function RunReadOnlyScan():Promise<main.ScanResult>;
+
+export function SetCleanupWorkspaceRoot(arg1:string):Promise<main.CleanupWorkspaceConfig>;

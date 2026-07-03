@@ -1,7 +1,13 @@
+@font-face {
+    font-family: "Nunito Local";
+    src: url("./assets/fonts/nunito-v16-latin-regular.woff2") format("woff2");
+    font-display: swap;
+}
+
 :root {
     color: #0f172a;
     background: #f8fafc;
-    font-family: "Fira Sans", "Segoe UI", sans-serif;
+    font-family: "Nunito Local", "Fira Sans", "Segoe UI", sans-serif;
     font-synthesis: none;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;

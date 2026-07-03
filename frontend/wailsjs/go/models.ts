@@ -43,6 +43,7 @@ export namespace history {
 	    updatedAt: string;
 	    cwd: string;
 	    archived: boolean;
+	    sizeBytes: number;
 	    firstUserMessage: string;
 	    preview: string;
 	
@@ -60,6 +61,7 @@ export namespace history {
 	        this.updatedAt = source["updatedAt"];
 	        this.cwd = source["cwd"];
 	        this.archived = source["archived"];
+	        this.sizeBytes = source["sizeBytes"];
 	        this.firstUserMessage = source["firstUserMessage"];
 	        this.preview = source["preview"];
 	    }
@@ -268,6 +270,7 @@ export namespace history {
 	    planPath: string;
 	    confirmed: boolean;
 	    backupOnly: boolean;
+	    skipBackup: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new ExecuteRequest(source);
@@ -278,6 +281,7 @@ export namespace history {
 	        this.planPath = source["planPath"];
 	        this.confirmed = source["confirmed"];
 	        this.backupOnly = source["backupOnly"];
+	        this.skipBackup = source["skipBackup"];
 	    }
 	}
 	export class VerificationFinding {
@@ -613,6 +617,22 @@ export namespace history {
 
 export namespace main {
 	
+	export class CleanupWorkspaceConfig {
+	    codexHome: string;
+	    backupRoot: string;
+	    usingDefault: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new CleanupWorkspaceConfig(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.codexHome = source["codexHome"];
+	        this.backupRoot = source["backupRoot"];
+	        this.usingDefault = source["usingDefault"];
+	    }
+	}
 	export class DeletePlanItem {
 	    duplicateGroup: string;
 	    sessionUid?: string;

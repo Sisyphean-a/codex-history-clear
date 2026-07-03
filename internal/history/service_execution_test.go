@@ -58,6 +58,34 @@ func TestBackupOnlyWritesArtifactsWithoutDeleting(t *testing.T) {
 	assertThreadRestored(t, service, testThreadID)
 }
 
+func TestDeleteWithoutBackupSkipsRollbackArtifacts(t *testing.T) {
+	service := newFixtureService(t)
+
+	plan, err := service.BuildDeletePlan(BuildPlanRequest{ThreadIDs: []string{testThreadID}})
+	if err != nil {
+		t.Fatalf("BuildDeletePlan() error = %v", err)
+	}
+	approved, err := service.ApproveDeletePlan(ApproveRequest{PlanPath: plan.PlanPath})
+	if err != nil {
+		t.Fatalf("ApproveDeletePlan() error = %v", err)
+	}
+	result, err := service.ExecuteDeletePlan(ExecuteRequest{
+		PlanPath:   approved.ApprovedPlanPath,
+		Confirmed:  true,
+		SkipBackup: true,
+	})
+	if err != nil {
+		t.Fatalf("ExecuteDeletePlan() error = %v", err)
+	}
+	if result.RollbackJournalPath != "" {
+		t.Fatalf("RollbackJournalPath = %q", result.RollbackJournalPath)
+	}
+	if len(result.Backups) != 0 {
+		t.Fatalf("backup count = %d", len(result.Backups))
+	}
+	assertThreadDeleted(t, service, testThreadID)
+}
+
 func TestExportEvidencePackWritesIndex(t *testing.T) {
 	service := newFixtureService(t)
 

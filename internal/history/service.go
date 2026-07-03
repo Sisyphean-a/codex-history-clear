@@ -10,17 +10,27 @@ import (
 )
 
 type Service struct {
-	now          func() time.Time
-	userHomeDir  func() (string, error)
-	newDiscovery func() *discovery.Service
+	now               func() time.Time
+	userHomeDir       func() (string, error)
+	newDiscovery      func() *discovery.Service
+	codexHomeOverride string
 }
 
 func NewService() *Service {
 	return &Service{
-		now:          time.Now,
-		userHomeDir:  os.UserHomeDir,
-		newDiscovery: discovery.NewService,
+		now:               time.Now,
+		userHomeDir:       os.UserHomeDir,
+		newDiscovery:      discovery.NewService,
+		codexHomeOverride: "",
 	}
+}
+
+func (s *Service) SetCodexHomeOverride(root string) {
+	s.codexHomeOverride = root
+}
+
+func (s *Service) CodexHomeOverride() string {
+	return s.codexHomeOverride
 }
 
 func (s *Service) ListThreads(request ListRequest) (ListResult, error) {
@@ -35,7 +45,7 @@ func (s *Service) ListThreads(request ListRequest) (ListResult, error) {
 	if err != nil {
 		return ListResult{}, err
 	}
-	limit := effectiveLimit(request.Limit)
+	limit := reportLimit(request.Limit, len(threads))
 	return ListResult{
 		CodexHome: paths.codexHome,
 		Summary: ListSummary{
@@ -45,6 +55,13 @@ func (s *Service) ListThreads(request ListRequest) (ListResult, error) {
 		},
 		Items: threads,
 	}, nil
+}
+
+func reportLimit(requested int, count int) int {
+	if requested < 0 {
+		return count
+	}
+	return effectiveLimit(requested)
 }
 
 func (s *Service) BuildDeletePlan(request BuildPlanRequest) (PlanResult, error) {
