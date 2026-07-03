@@ -3,7 +3,7 @@ doc_type: roadmap
 slug: codex-history-manager
 status: active
 created: 2026-06-30
-last_reviewed: 2026-06-30
+last_reviewed: 2026-07-02
 tags: [windows, codex, history, cleanup, go, wails2, desktop]
 related_requirements: [codex-history-management]
 related_architecture: []
@@ -31,7 +31,7 @@ related_architecture: []
 
 - OpenAI 云端 Conversations / Responses 的同步器
 - 浏览器缓存和 WebView 用户数据的深度解析器
-- 直接修改 live SQLite 或 JSONL 的默认自动化路径
+- 无审批、无备份、无回滚、无复扫的直接改写路径
 - 跨平台（macOS / Linux）一次性交付；本期按 Windows 优先
 - 与 Codex 无关的通用本地文件清理平台
 
@@ -272,42 +272,42 @@ type ScanResult struct {
 1. **read-only-manifest-baseline** — 初始化 Wails2 桌面壳层并从候选根目录生成只读 discovery 快照和统一 manifest 基线
    - 所属模块：Wails2 Desktop Shell, Discovery Layer
    - 依赖：无
-   - 状态：in-progress
+   - 状态：done
    - 对应 feature：`2026-06-30-read-only-manifest-baseline`
    - 备注：最小闭环；完成后即可用真实样本验证定位规则并在界面展示摘要
 
 2. **path-and-project-canonicalization** — 归一化 Win32、WSL、reparse point 和 worktree 路径，区分路径别名与真实副本
    - 所属模块：Canonicalization & Planning Layer
    - 依赖：`read-only-manifest-baseline`
-   - 状态：in-progress
+   - 状态：done
    - 对应 feature：`2026-06-30-path-and-project-canonicalization`
    - 备注：为重复判定和 UI 标注提供统一坐标系
 
 3. **duplicate-grouping-and-retention-planning** — 基于统一 manifest 生成重复组、保留本和删除计划
    - 所属模块：Canonicalization & Planning Layer
    - 依赖：`read-only-manifest-baseline`, `path-and-project-canonicalization`
-   - 状态：in-progress
+   - 状态：done
    - 对应 feature：`2026-06-30-duplicate-grouping-and-retention-planning`
    - 备注：明确分离逻辑重复与物理重复
 
 4. **archive-and-quarantine-execution** — 执行 archive、quarantine、delete 和 repair_index 包装，并通过桌面壳层持续回传作业进度
    - 所属模块：Execution & Verification Layer
    - 依赖：`duplicate-grouping-and-retention-planning`
-   - 状态：in-progress
+   - 状态：done
    - 对应 feature：`2026-06-30-archive-and-quarantine-execution`
    - 备注：默认支持 dry-run、人工确认和 rollback journal
 
 5. **post-run-verification-and-backup** — 加入在线备份、执行后复扫、一致性校验和敏感文件保护
    - 所属模块：Execution & Verification Layer
    - 依赖：`archive-and-quarantine-execution`
-   - 状态：in-progress
+   - 状态：done
    - 对应 feature：`2026-06-30-post-run-verification-and-backup`
    - 备注：把回滚、安全和验证闭环补齐
 
 6. **operator-surface-and-fixtures** — 提供桌面工作区、样本夹具、报告导出和最小 smoke / build 验证
    - 所属模块：Wails2 Desktop Shell, Execution & Verification Layer
    - 依赖：`read-only-manifest-baseline`, `duplicate-grouping-and-retention-planning`, `post-run-verification-and-backup`
-   - 状态：in-progress
+   - 状态：done
    - 对应 feature：`2026-06-30-operator-surface-and-fixtures`
    - 备注：收口条目，确保桌面交互、样本验证和打包交付都有稳定入口
 
@@ -345,7 +345,7 @@ Top 3 风险与缓解：
 
 - 当前仓库还没有真实样本、Wails2 scaffold 或现成代码，第一条完成后要把“未知对象”“路径变体”和前端验证命令一起固化为 fixture / smoke 入口。
 - 当前仓库虽是 git 仓库，但还没有 `HEAD` 基线提交；后续真正生成 goal 执行包前必须先补上初始提交，否则 `goal-state.yaml` 无法写合法 `baseline_ref`。
-- 如果真实环境里 `codex delete` 无法覆盖某些本地对象，仍然不要直接回退到 live DB 写操作；先回 roadmap 补安全路径。
+- 如果真实环境里官方 CLI 无法覆盖某些本地对象，允许在 approved plan、备份、rollback 和复扫都落地时走本地改写链路，而不是继续把需求卡死在“只能看不能删”。
 - 如果浏览器或 WebView 状态在真实部署里成为主入口，应另开一份 roadmap，而不是把本 roadmap 静默扩成通用浏览器取证工具。
 
 ## 8. 变更日志（update 模式）

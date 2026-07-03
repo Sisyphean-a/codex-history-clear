@@ -21,25 +21,25 @@ steps:
 checks:
   - item: "扫描请求只能经 Go 绑定进入，前端不直接拼路径或命令"
     source: 名词契约
-    status: pending
+    status: passed
   - item: "只读扫描只能写 OutputDir 内 artifact，不允许写源目录"
     source: 流程级约束
-    status: pending
+    status: passed
   - item: "工作区能展示 run_id、摘要、artifact 路径和 warnings"
     source: 编排骨架
-    status: pending
+    status: passed
   - item: "CLI 不可用时进入 warning，而不是伪成功"
     source: 验收场景
-    status: pending
+    status: passed
   - item: "不存在根目录时显式报错"
     source: 验收场景
-    status: pending
+    status: passed
   - item: "代码中不存在 delete / archive / quarantine 执行入口"
     source: 范围守护
-    status: pending
+    status: passed
   - item: "挂载点仅包含绑定注册、工作区入口、artifact writer 和构建配置"
     source: 挂载点
-    status: pending
+    status: passed
 
 dod:
   commands:

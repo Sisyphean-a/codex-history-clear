@@ -86,7 +86,30 @@
     opacity: 0.72;
 }
 
+.次按钮 {
+    min-width: 140px;
+    height: 38px;
+    border: 1px solid #c8d7e6;
+    border-radius: 12px;
+    background: #f8fbfe;
+    color: #23425d;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.次按钮:disabled {
+    cursor: progress;
+    opacity: 0.72;
+}
+
 .结果区 {
+    display: grid;
+    gap: 12px;
+}
+
+.功能列,
+.功能卡,
+.内层面板 {
     display: grid;
     gap: 12px;
 }
@@ -95,6 +118,10 @@
     display: grid;
     grid-template-columns: repeat(6, minmax(0, 1fr));
     gap: 10px;
+}
+
+.指标网格.三列 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .指标卡,
@@ -154,6 +181,13 @@
 .组列表 {
     display: grid;
     gap: 8px;
+}
+
+.操作列 {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
 }
 
 .数据行 {

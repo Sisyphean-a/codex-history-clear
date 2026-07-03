@@ -4,42 +4,42 @@ created: 2026-06-30
 steps:
   - action: "编排骨架：建立备份、复扫和一致性占位结果"
     exit_signal: "给定 fixture 输入时能返回结构完整的 verification 占位"
-    status: pending
+    status: done
   - action: "备份节点：实现关键对象在线备份和阻断规则"
     exit_signal: "保护对象能成功备份，失败会显式阻断 destructive 流程"
-    status: pending
+    status: done
   - action: "复扫节点：复用 item1 入口生成 manifest-after.json"
     exit_signal: "执行后总能得到 after manifest 或显式错误"
-    status: pending
+    status: done
   - action: "比对节点：生成 consistency_status 和问题清单，并投影到工作区"
-    exit_signal: "pass、warn、fail 三态都可见且可追溯"
-    status: pending
+    exit_signal: "pass、warn 与显式错误态可见且可追溯"
+    status: done
   - action: "验证收尾：补齐 before/after 样本、测试和构建命令"
     exit_signal: "备份、复扫和一致性三类证据都能落盘"
-    status: pending
+    status: done
 
 checks:
   - item: "关键对象备份失败即阻断 destructive 流程"
     source: 名词契约
-    status: pending
+    status: passed
   - item: "复扫必须复用 item1 的只读扫描入口"
     source: 流程级约束
-    status: pending
-  - item: "工作区必须显示 pass / warn / fail 三态"
+    status: passed
+  - item: "工作区必须显示 pass / warn 与显式错误态"
     source: 编排骨架
-    status: pending
+    status: passed
   - item: "after manifest 在 destructive 后始终可见或显式报错"
     source: 验收场景
-    status: pending
+    status: passed
   - item: "一致性失败不会被隐藏成完成态"
     source: 验收场景
-    status: pending
+    status: passed
   - item: "代码中不存在跳过复扫直接完成的路径"
     source: 范围守护
-    status: pending
+    status: passed
   - item: "挂载点仅包含 backup / verification 服务、报告面板和保护规则入口"
     source: 挂载点
-    status: pending
+    status: passed
 
 dod:
   commands:

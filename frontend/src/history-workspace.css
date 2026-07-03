@@ -1,0 +1,48 @@
+.筛选网格 {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+    gap: 10px;
+}
+
+.字段 {
+    display: grid;
+    gap: 6px;
+}
+
+.字段 span,
+.勾选项 span,
+.路径提示 {
+    color: #5d7488;
+    font-size: 12px;
+}
+
+.输入 {
+    width: 100%;
+    min-height: 38px;
+    padding: 0 12px;
+    border: 1px solid #d7e1ea;
+    border-radius: 12px;
+    background: #fbfdff;
+    color: #10233a;
+}
+
+.勾选项 {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.危险提示 {
+    padding: 10px 12px;
+    border: 1px solid #f4d4aa;
+    border-radius: 12px;
+    background: #fff8ef;
+    color: #9a5a10;
+    font-size: 12px;
+}
+
+@media (max-width: 1200px) {
+    .筛选网格 {
+        grid-template-columns: 1fr;
+    }
+}

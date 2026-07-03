@@ -100,3 +100,10 @@ created_at: 2026-06-30
 - 我会据此完成 `cs-goal` 的 grill 总结；
 - 创建或恢复 goal 目录下的 `state.yaml` 和 `goal.md`；
 - 把 `next_action` 对齐到你选定的边界，再开始第一轮 iteration。
+
+## 2026-07-02 Blocked Note
+
+- 当前 goal 的实现、测试、smoke 和桌面证据都已推进到独立功能验收前。
+- 关闭 goal 仍需要按 `cs-goal` 规则拿到 Task agent 功能验收 verdict。
+- 但平台连续三次返回 `agent thread limit reached`，导致新的独立 auditor 无法启动。
+- 因此当前阻塞不是 owner 未授权，也不是代码缺口，而是平台容量未释放。

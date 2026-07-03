@@ -1,7 +1,7 @@
 ---
 id: 002
 title: 删除采用可回滚的两阶段流程
-status: proposed
+status: accepted
 date: 2026-06-30
 relates_to: [requirements/codex-history-management]
 ---
@@ -16,8 +16,8 @@ relates_to: [requirements/codex-history-management]
 
 本项目把删除定义为两阶段流程：
 
-- 第一阶段只做扫描、规范化、分组、备份和删除计划生成。
-- 第二阶段先执行 `archive` 或隔离移动，再执行永久删除或索引修复。
+- 第一阶段只做扫描、规范化、分组和删除计划生成。
+- 第二阶段在 approved plan 下先做备份与 backup-only 预演，再执行本地删除、索引改写和执行后复扫。
 - 所有 destructive 动作都要求回滚日志、执行结果和执行后复扫。
 - 逻辑去重和物理清理分开处理，不把“同会话多入口”直接等同于“多余文件副本”。
 

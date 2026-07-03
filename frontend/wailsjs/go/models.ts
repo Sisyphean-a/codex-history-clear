@@ -1,3 +1,616 @@
+export namespace history {
+	
+	export class ApproveRequest {
+	    planPath: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new ApproveRequest(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.planPath = source["planPath"];
+	    }
+	}
+	export class PlanStore {
+	    store: string;
+	    path: string;
+	    action: string;
+	    detail: string;
+	    count: number;
+	    exists: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new PlanStore(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.store = source["store"];
+	        this.path = source["path"];
+	        this.action = source["action"];
+	        this.detail = source["detail"];
+	        this.count = source["count"];
+	        this.exists = source["exists"];
+	    }
+	}
+	export class ThreadSummary {
+	    id: string;
+	    title: string;
+	    sourceTitle: string;
+	    rolloutPath: string;
+	    createdAt: string;
+	    updatedAt: string;
+	    cwd: string;
+	    archived: boolean;
+	    firstUserMessage: string;
+	    preview: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new ThreadSummary(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.title = source["title"];
+	        this.sourceTitle = source["sourceTitle"];
+	        this.rolloutPath = source["rolloutPath"];
+	        this.createdAt = source["createdAt"];
+	        this.updatedAt = source["updatedAt"];
+	        this.cwd = source["cwd"];
+	        this.archived = source["archived"];
+	        this.firstUserMessage = source["firstUserMessage"];
+	        this.preview = source["preview"];
+	    }
+	}
+	export class PlanTarget {
+	    thread: ThreadSummary;
+	    stores: PlanStore[];
+	    warnings: string[];
+	
+	    static createFrom(source: any = {}) {
+	        return new PlanTarget(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.thread = this.convertValues(source["thread"], ThreadSummary);
+	        this.stores = this.convertValues(source["stores"], PlanStore);
+	        this.warnings = source["warnings"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class PlanSummary {
+	    targetCount: number;
+	    storeCount: number;
+	    warningCount: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new PlanSummary(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.targetCount = source["targetCount"];
+	        this.storeCount = source["storeCount"];
+	        this.warningCount = source["warningCount"];
+	    }
+	}
+	export class ApproveResult {
+	    runId: string;
+	    planPath: string;
+	    approvedPlanPath: string;
+	    summary: PlanSummary;
+	    targets: PlanTarget[];
+	    warnings: string[];
+	
+	    static createFrom(source: any = {}) {
+	        return new ApproveResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.runId = source["runId"];
+	        this.planPath = source["planPath"];
+	        this.approvedPlanPath = source["approvedPlanPath"];
+	        this.summary = this.convertValues(source["summary"], PlanSummary);
+	        this.targets = this.convertValues(source["targets"], PlanTarget);
+	        this.warnings = source["warnings"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class BackupArtifact {
+	    originalPath: string;
+	    backupPath: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new BackupArtifact(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.originalPath = source["originalPath"];
+	        this.backupPath = source["backupPath"];
+	    }
+	}
+	export class BuildPlanRequest {
+	    threadIds: string[];
+	
+	    static createFrom(source: any = {}) {
+	        return new BuildPlanRequest(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.threadIds = source["threadIds"];
+	    }
+	}
+	export class EvidencePackArtifact {
+	    label: string;
+	    path: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new EvidencePackArtifact(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.label = source["label"];
+	        this.path = source["path"];
+	    }
+	}
+	export class EvidencePackRequest {
+	    runId: string;
+	    discoveryPath: string;
+	    manifestBeforePath: string;
+	    duplicateGroupsPath: string;
+	    deletePlanPath: string;
+	    approvedPlanPath: string;
+	    rollbackJournalPath: string;
+	    execResultPath: string;
+	    manifestAfterPath: string;
+	    goalReportPath: string;
+	    iterationReportPath: string;
+	    roadmapPath: string;
+	    requirementPath: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new EvidencePackRequest(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.runId = source["runId"];
+	        this.discoveryPath = source["discoveryPath"];
+	        this.manifestBeforePath = source["manifestBeforePath"];
+	        this.duplicateGroupsPath = source["duplicateGroupsPath"];
+	        this.deletePlanPath = source["deletePlanPath"];
+	        this.approvedPlanPath = source["approvedPlanPath"];
+	        this.rollbackJournalPath = source["rollbackJournalPath"];
+	        this.execResultPath = source["execResultPath"];
+	        this.manifestAfterPath = source["manifestAfterPath"];
+	        this.goalReportPath = source["goalReportPath"];
+	        this.iterationReportPath = source["iterationReportPath"];
+	        this.roadmapPath = source["roadmapPath"];
+	        this.requirementPath = source["requirementPath"];
+	    }
+	}
+	export class EvidencePackResult {
+	    runId: string;
+	    evidencePackPath: string;
+	    artifacts: EvidencePackArtifact[];
+	
+	    static createFrom(source: any = {}) {
+	        return new EvidencePackResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.runId = source["runId"];
+	        this.evidencePackPath = source["evidencePackPath"];
+	        this.artifacts = this.convertValues(source["artifacts"], EvidencePackArtifact);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class ExecuteRequest {
+	    planPath: string;
+	    confirmed: boolean;
+	    backupOnly: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new ExecuteRequest(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.planPath = source["planPath"];
+	        this.confirmed = source["confirmed"];
+	        this.backupOnly = source["backupOnly"];
+	    }
+	}
+	export class VerificationFinding {
+	    store: string;
+	    path: string;
+	    detail: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new VerificationFinding(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.store = source["store"];
+	        this.path = source["path"];
+	        this.detail = source["detail"];
+	    }
+	}
+	export class VerificationResult {
+	    status: string;
+	    summary: string;
+	    success: boolean;
+	    remainingReferences: VerificationFinding[];
+	
+	    static createFrom(source: any = {}) {
+	        return new VerificationResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.status = source["status"];
+	        this.summary = source["summary"];
+	        this.success = source["success"];
+	        this.remainingReferences = this.convertValues(source["remainingReferences"], VerificationFinding);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class JobEvent {
+	    phase: string;
+	    itemIndex: number;
+	    itemTotal: number;
+	    level: string;
+	    message: string;
+	    artifactPath: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new JobEvent(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.phase = source["phase"];
+	        this.itemIndex = source["itemIndex"];
+	        this.itemTotal = source["itemTotal"];
+	        this.level = source["level"];
+	        this.message = source["message"];
+	        this.artifactPath = source["artifactPath"];
+	    }
+	}
+	export class MutationResult {
+	    store: string;
+	    action: string;
+	    path: string;
+	    changedRows: number;
+	    changed: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new MutationResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.store = source["store"];
+	        this.action = source["action"];
+	        this.path = source["path"];
+	        this.changedRows = source["changedRows"];
+	        this.changed = source["changed"];
+	    }
+	}
+	export class ExecuteResult {
+	    runId: string;
+	    mode: string;
+	    planPath: string;
+	    approvedPlanPath: string;
+	    rollbackJournalPath: string;
+	    execResultPath: string;
+	    manifestAfterPath: string;
+	    backups: BackupArtifact[];
+	    mutations: MutationResult[];
+	    events: JobEvent[];
+	    verification: VerificationResult;
+	
+	    static createFrom(source: any = {}) {
+	        return new ExecuteResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.runId = source["runId"];
+	        this.mode = source["mode"];
+	        this.planPath = source["planPath"];
+	        this.approvedPlanPath = source["approvedPlanPath"];
+	        this.rollbackJournalPath = source["rollbackJournalPath"];
+	        this.execResultPath = source["execResultPath"];
+	        this.manifestAfterPath = source["manifestAfterPath"];
+	        this.backups = this.convertValues(source["backups"], BackupArtifact);
+	        this.mutations = this.convertValues(source["mutations"], MutationResult);
+	        this.events = this.convertValues(source["events"], JobEvent);
+	        this.verification = this.convertValues(source["verification"], VerificationResult);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
+	export class ListRequest {
+	    limit: number;
+	    cwd: string;
+	    grep: string;
+	    archived: boolean;
+	    all: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new ListRequest(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.limit = source["limit"];
+	        this.cwd = source["cwd"];
+	        this.grep = source["grep"];
+	        this.archived = source["archived"];
+	        this.all = source["all"];
+	    }
+	}
+	export class ListSummary {
+	    count: number;
+	    limit: number;
+	    hasMore: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new ListSummary(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.count = source["count"];
+	        this.limit = source["limit"];
+	        this.hasMore = source["hasMore"];
+	    }
+	}
+	export class ListResult {
+	    codexHome: string;
+	    summary: ListSummary;
+	    items: ThreadSummary[];
+	
+	    static createFrom(source: any = {}) {
+	        return new ListResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.codexHome = source["codexHome"];
+	        this.summary = this.convertValues(source["summary"], ListSummary);
+	        this.items = this.convertValues(source["items"], ThreadSummary);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
+	
+	export class PlanResult {
+	    runId: string;
+	    codexHome: string;
+	    planPath: string;
+	    summary: PlanSummary;
+	    targets: PlanTarget[];
+	    warnings: string[];
+	
+	    static createFrom(source: any = {}) {
+	        return new PlanResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.runId = source["runId"];
+	        this.codexHome = source["codexHome"];
+	        this.planPath = source["planPath"];
+	        this.summary = this.convertValues(source["summary"], PlanSummary);
+	        this.targets = this.convertValues(source["targets"], PlanTarget);
+	        this.warnings = source["warnings"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
+	
+	
+	export class RollbackEntry {
+	    originalPath: string;
+	    backupPath: string;
+	    restored: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new RollbackEntry(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.originalPath = source["originalPath"];
+	        this.backupPath = source["backupPath"];
+	        this.restored = source["restored"];
+	    }
+	}
+	export class RollbackRequest {
+	    journalPath: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new RollbackRequest(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.journalPath = source["journalPath"];
+	    }
+	}
+	export class RollbackResult {
+	    runId: string;
+	    journalPath: string;
+	    restoredCount: number;
+	    entries: RollbackEntry[];
+	    events: JobEvent[];
+	
+	    static createFrom(source: any = {}) {
+	        return new RollbackResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.runId = source["runId"];
+	        this.journalPath = source["journalPath"];
+	        this.restoredCount = source["restoredCount"];
+	        this.entries = this.convertValues(source["entries"], RollbackEntry);
+	        this.events = this.convertValues(source["events"], JobEvent);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
+	
+
+}
+
 export namespace main {
 	
 	export class DeletePlanItem {

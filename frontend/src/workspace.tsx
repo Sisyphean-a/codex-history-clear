@@ -169,6 +169,32 @@ function ItemTable({items}: { items: ScanResult['items'] }) {
     );
 }
 
+function WorkspaceOverview({scan, plan}: { scan: ScanResult; plan: DeletePlanResult }) {
+    return (
+        <section className="双栏">
+            <article className="面板">
+                <header className="面板头"><h2>运行与产物</h2></header>
+                <div className="数据列">
+                    <DataRow label="运行 ID" value={scan.runId}/>
+                    <DataRow label="发现清单" value={scan.discoveryPath}/>
+                    <DataRow label="执行前清单" value={scan.manifestPath}/>
+                    <DataRow label="重复组清单" value={plan.duplicateGroupsPath}/>
+                    <DataRow label="删除计划" value={plan.deletePlanPath}/>
+                    <DataRow label="未识别对象" value={scan.unknownItemsPath}/>
+                </div>
+            </article>
+
+            <article className="面板">
+                <header className="面板头">
+                    <h2>计划 warning</h2>
+                    <StatusTag text="只读复核" tone="neutral"/>
+                </header>
+                <WarningList warnings={plan.warnings}/>
+            </article>
+        </section>
+    );
+}
+
 function ReadyWorkspace({scan, plan}: { scan: ScanResult; plan: DeletePlanResult }) {
     return (
         <div className="结果区">
@@ -180,28 +206,7 @@ function ReadyWorkspace({scan, plan}: { scan: ScanResult; plan: DeletePlanResult
                 <MetricCard label="待人工复核" value={plan.summary.reviewCount}/>
                 <MetricCard label="未识别对象" value={scan.summary.unknownCount}/>
             </section>
-
-            <section className="双栏">
-                <article className="面板">
-                    <header className="面板头"><h2>运行与产物</h2></header>
-                    <div className="数据列">
-                        <DataRow label="运行 ID" value={scan.runId}/>
-                        <DataRow label="发现清单" value={scan.discoveryPath}/>
-                        <DataRow label="执行前清单" value={scan.manifestPath}/>
-                        <DataRow label="重复组清单" value={plan.duplicateGroupsPath}/>
-                        <DataRow label="删除计划" value={plan.deletePlanPath}/>
-                        <DataRow label="未识别对象" value={scan.unknownItemsPath}/>
-                    </div>
-                </article>
-
-                <article className="面板">
-                    <header className="面板头">
-                        <h2>计划 warning</h2>
-                        <StatusTag text="只读复核" tone="neutral"/>
-                    </header>
-                    <WarningList warnings={plan.warnings}/>
-                </article>
-            </section>
+            <WorkspaceOverview plan={plan} scan={scan}/>
 
             <article className="面板">
                 <header className="面板头">
