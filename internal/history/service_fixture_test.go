@@ -112,7 +112,7 @@ func buildStateDB(t *testing.T, path string, codexHome string) {
 	}
 	defer db.Close()
 	execStatements(t, db, []string{
-		`create table threads (id text primary key, rollout_path text, created_at integer, updated_at integer, title text, cwd text, archived integer, first_user_message text, preview text, created_at_ms integer, updated_at_ms integer);`,
+		`create table threads (id text primary key, rollout_path text, created_at integer, updated_at integer, title text, source text, model_provider text, thread_source text, cwd text, archived integer, first_user_message text, preview text, created_at_ms integer, updated_at_ms integer);`,
 		`create table thread_dynamic_tools (thread_id text, position integer, name text);`,
 		`create table thread_spawn_edges (parent_thread_id text, child_thread_id text, status text);`,
 		`create table agent_job_items (assigned_thread_id text);`,
@@ -149,8 +149,15 @@ func buildGoalsDB(t *testing.T, path string) {
 
 func insertThread(t *testing.T, db *sql.DB, id string, rolloutPath string, title string, cwd string, updatedAt int64) {
 	t.Helper()
-	mustExec(t, db, `insert into threads(id, rollout_path, created_at, updated_at, title, cwd, archived, first_user_message, preview, created_at_ms, updated_at_ms) values (?, ?, ?, ?, ?, ?, 0, ?, ?, ?, ?)`,
-		id, rolloutPath, updatedAt, updatedAt, title, cwd, title, title, updatedAt*1000, updatedAt*1000,
+	source := "vscode"
+	modelProvider := "hi_code"
+	threadSource := "user"
+	if id == testOtherID {
+		source = "cli"
+		modelProvider = "openai"
+	}
+	mustExec(t, db, `insert into threads(id, rollout_path, created_at, updated_at, title, source, model_provider, thread_source, cwd, archived, first_user_message, preview, created_at_ms, updated_at_ms) values (?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?, ?)`,
+		id, rolloutPath, updatedAt, updatedAt, title, source, modelProvider, threadSource, cwd, title, title, updatedAt*1000, updatedAt*1000,
 	)
 }
 

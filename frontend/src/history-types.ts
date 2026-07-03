@@ -2,6 +2,9 @@ export type HistoryThread = {
     id: string;
     title: string;
     sourceTitle: string;
+    source: string;
+    modelProvider: string;
+    threadSource: string;
     rolloutPath: string;
     createdAt: string;
     updatedAt: string;

@@ -137,7 +137,12 @@ export function SessionPanel(props: HistoryWorkspaceController) {
                     </div>
                 </div>
             </header>
-            <HistoryThreadTable items={props.visibleThreads} selectedIds={props.selectedIds} toggleSelected={props.actions.toggleSelected}/>
+            <HistoryThreadTable
+                items={props.visibleThreads}
+                scanWorkspace={props.scanWorkspace}
+                selectedIds={props.selectedIds}
+                toggleSelected={props.actions.toggleSelected}
+            />
             <footer className="列表底栏">
                 <strong>已选择 {props.selectedIds.length} 条会话</strong>
                 <span>{loadState}</span>

@@ -12,6 +12,9 @@ type ThreadSummary struct {
 	ID               string `json:"id"`
 	Title            string `json:"title"`
 	SourceTitle      string `json:"sourceTitle"`
+	Source           string `json:"source"`
+	ModelProvider    string `json:"modelProvider"`
+	ThreadSource     string `json:"threadSource"`
 	RolloutPath      string `json:"rolloutPath"`
 	CreatedAt        string `json:"createdAt"`
 	UpdatedAt        string `json:"updatedAt"`

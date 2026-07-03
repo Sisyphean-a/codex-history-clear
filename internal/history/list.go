@@ -16,6 +16,9 @@ const (
 type threadRow struct {
 	ID               string
 	Title            string
+	Source           string
+	ModelProvider    string
+	ThreadSource     string
 	RolloutPath      string
 	CreatedAt        int64
 	UpdatedAt        int64
@@ -100,7 +103,7 @@ func resolveTarget(paths codexPaths, threadID string) (ThreadSummary, error) {
 	defer db.Close()
 
 	rows, err := db.Query(
-		`select id, title, rollout_path, created_at, updated_at, created_at_ms, updated_at_ms, cwd, archived, first_user_message, preview
+		`select id, title, source, model_provider, thread_source, rollout_path, created_at, updated_at, created_at_ms, updated_at_ms, cwd, archived, first_user_message, preview
 		from threads
 		where id like ?
 		order by coalesce(updated_at_ms, updated_at * 1000) desc, id desc`,
@@ -149,7 +152,7 @@ func buildThreadQuery(request ListRequest) (string, []any) {
 		where = append(where, `lower(cwd) like lower(?) escape '\'`)
 		args = append(args, "%"+escapeLike(request.CWD)+"%")
 	}
-	query := `select id, title, rollout_path, created_at, updated_at, created_at_ms, updated_at_ms, cwd, archived, first_user_message, preview from threads`
+	query := `select id, title, source, model_provider, thread_source, rollout_path, created_at, updated_at, created_at_ms, updated_at_ms, cwd, archived, first_user_message, preview from threads`
 	if len(where) > 0 {
 		query += " where " + strings.Join(where, " and ")
 	}
@@ -162,6 +165,9 @@ func scanThreadRow(rows *sql.Rows) (threadRow, error) {
 	err := rows.Scan(
 		&row.ID,
 		&row.Title,
+		&row.Source,
+		&row.ModelProvider,
+		&row.ThreadSource,
 		&row.RolloutPath,
 		&row.CreatedAt,
 		&row.UpdatedAt,
@@ -185,6 +191,9 @@ func mapThreadRow(paths codexPaths, row threadRow, sessionIndex map[string]sessi
 		ID:               row.ID,
 		Title:            title,
 		SourceTitle:      sourceTitle,
+		Source:           row.Source,
+		ModelProvider:    row.ModelProvider,
+		ThreadSource:     row.ThreadSource,
 		RolloutPath:      row.RolloutPath,
 		CreatedAt:        formatUnix(row.CreatedAtMS, row.CreatedAt),
 		UpdatedAt:        formatUnix(row.UpdatedAtMS, row.UpdatedAt),

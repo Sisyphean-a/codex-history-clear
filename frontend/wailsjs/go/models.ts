@@ -38,6 +38,9 @@ export namespace history {
 	    id: string;
 	    title: string;
 	    sourceTitle: string;
+	    source: string;
+	    modelProvider: string;
+	    threadSource: string;
 	    rolloutPath: string;
 	    createdAt: string;
 	    updatedAt: string;
@@ -56,6 +59,9 @@ export namespace history {
 	        this.id = source["id"];
 	        this.title = source["title"];
 	        this.sourceTitle = source["sourceTitle"];
+	        this.source = source["source"];
+	        this.modelProvider = source["modelProvider"];
+	        this.threadSource = source["threadSource"];
 	        this.rolloutPath = source["rolloutPath"];
 	        this.createdAt = source["createdAt"];
 	        this.updatedAt = source["updatedAt"];

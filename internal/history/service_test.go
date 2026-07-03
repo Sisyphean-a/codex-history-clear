@@ -15,6 +15,9 @@ func TestListThreadsMergesSessionIndexTitle(t *testing.T) {
 	if result.Items[0].Title != "展示标题" {
 		t.Fatalf("ListThreads() title = %q", result.Items[0].Title)
 	}
+	if result.Items[0].Source != "vscode" || result.Items[0].ModelProvider != "hi_code" {
+		t.Fatalf("ListThreads() source/provider = %q/%q", result.Items[0].Source, result.Items[0].ModelProvider)
+	}
 }
 
 func TestListThreadsWithoutLimitReturnsAll(t *testing.T) {

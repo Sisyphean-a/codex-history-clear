@@ -411,11 +411,102 @@
 .会话元信息 {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
-    color: var(--muted);
+    gap: 8px;
 }
 
-.会话元信息 span + span::before,
+.会话元信息项 {
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
+    max-width: 100%;
+    padding: 0 10px;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.会话元信息项.project {
+    color: #236583;
+    border-color: #c9e2ed;
+    background: #edf7fb;
+}
+
+.会话元信息项.time {
+    color: #a06a20;
+    border-color: #f1d7a8;
+    background: #fff5e5;
+}
+
+.会话元信息项.size {
+    color: #0a7d71;
+    border-color: rgba(15, 153, 137, 0.2);
+    background: var(--primary-soft);
+}
+
+.会话元信息项.source {
+    color: #31589e;
+    border-color: #cfdcf6;
+    background: #eef3ff;
+}
+
+.会话元信息项.provider {
+    color: #7d4f25;
+    border-color: #efd5bf;
+    background: #fff2ea;
+}
+
+.会话元信息项.provider-openai {
+    color: #1f7a45;
+    border-color: #c3e8cf;
+    background: #e9f8ef;
+}
+
+.会话元信息项.provider-hi-code {
+    color: #9c5421;
+    border-color: #efcfb4;
+    background: #fff0e6;
+}
+
+.会话元信息项.provider-custom {
+    color: #8c6515;
+    border-color: #ead29d;
+    background: #fff6df;
+}
+
+.会话元信息项.provider-generic {
+    color: #7d4f25;
+    border-color: #efd5bf;
+    background: #fff2ea;
+}
+
+.会话元信息项.thread {
+    color: #7b4b18;
+    border-color: #edd8b1;
+    background: #fff6e8;
+}
+
+.会话元信息项.duplicate {
+    color: #a35230;
+    border-color: rgba(205, 116, 74, 0.24);
+    background: #fff1ea;
+}
+
+.会话元信息项.duplicate-stable {
+    color: #8d3d58;
+    border-color: #ebc8d5;
+    background: #fff0f5;
+}
+
+.会话元信息项.duplicate-review {
+    color: #a35230;
+    border-color: rgba(205, 116, 74, 0.24);
+    background: #fff1ea;
+}
+
 .状态列 span + span::before {
     content: "·";
     margin-right: 10px;

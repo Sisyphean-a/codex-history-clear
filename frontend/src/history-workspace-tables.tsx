@@ -4,6 +4,7 @@ import type {
     HistoryPlanResult,
     HistoryThread,
 } from './history-types';
+import type {WorkspaceState} from './workspace-types';
 
 const actionLabels: Record<string, string> = {
     delete_rows: '删行',
@@ -30,8 +31,87 @@ function threadBadge(item: HistoryThread, selected: boolean): { label: string; t
     return {label: '建议保留', tone: 'neutral'};
 }
 
-function rowMeta(item: HistoryThread) {
-    return [projectLabel(item), formatDateTime(item.updatedAt), formatBytes(item.sizeBytes)].filter(Boolean);
+type MetaTone = 'project' | 'time' | 'size' | 'source' | 'provider' | 'thread' | 'duplicate';
+
+type MetaItem = {
+    key: string;
+    text: string;
+    tone: MetaTone;
+    variant?: string;
+};
+
+type DuplicateHint = {
+    copies: number;
+    reviewNeeded: boolean;
+};
+
+function rowMeta(item: HistoryThread, duplicateHint?: DuplicateHint) {
+    const items: MetaItem[] = [
+        {key: 'project', text: projectLabel(item), tone: 'project'},
+        {key: 'updatedAt', text: formatDateTime(item.updatedAt), tone: 'time'},
+        {key: 'size', text: formatBytes(item.sizeBytes), tone: 'size'},
+    ];
+    const source = sourceLabel(item);
+    if (source !== '') items.push({key: 'source', text: source, tone: 'source'});
+    const provider = providerLabel(item.modelProvider);
+    if (provider !== '') items.push({key: 'provider', text: provider, tone: 'provider', variant: providerVariant(item.modelProvider)});
+    const threadSource = threadSourceLabel(item.threadSource);
+    if (threadSource !== '') items.push({key: 'threadSource', text: threadSource, tone: 'thread'});
+    if (duplicateHint && duplicateHint.copies > 0) {
+        items.push({
+            key: 'duplicate',
+            text: `${duplicateHint.reviewNeeded ? '疑似重复' : '重复副本'} ${duplicateHint.copies}`,
+            tone: 'duplicate',
+            variant: duplicateHint.reviewNeeded ? 'review' : 'stable',
+        });
+    }
+    return items;
+}
+
+function sourceLabel(item: HistoryThread) {
+    if (item.threadSource === 'subagent') return '子代理';
+    if (item.source.trim().startsWith('{')) return '子代理';
+    if (item.source === 'vscode') return 'VSCode';
+    if (item.source === 'cli') return 'CLI';
+    return item.source.trim();
+}
+
+function providerLabel(value: string) {
+    if (value === 'hi_code') return 'Hi Code';
+    if (value === 'openai') return 'OpenAI';
+    if (value === 'custom') return '自定义';
+    return value.trim();
+}
+
+function providerVariant(value: string) {
+    if (value === 'hi_code') return 'hi-code';
+    if (value === 'openai') return 'openai';
+    if (value === 'custom') return 'custom';
+    return 'generic';
+}
+
+function threadSourceLabel(value: string) {
+    if (value === 'subagent') return '派生会话';
+    return '';
+}
+
+function duplicateHints(workspace: WorkspaceState) {
+    const hints = new Map<string, DuplicateHint>();
+    if (workspace.kind !== 'ready') return hints;
+    for (const group of workspace.plan.groups) {
+        const copies = Math.max(0, group.candidates.length - 1);
+        if (copies === 0) continue;
+        for (const candidate of group.candidates) {
+            const keys = [candidate.sessionUid, candidate.sourcePath].filter(Boolean) as string[];
+            for (const key of keys) {
+                const existing = hints.get(key);
+                if (!existing || existing.copies < copies || (existing.reviewNeeded && !group.reviewNeeded)) {
+                    hints.set(key, {copies, reviewNeeded: group.reviewNeeded});
+                }
+            }
+        }
+    }
+    return hints;
 }
 
 function tagTone(tag: 'accent' | 'warn' | 'neutral') {
@@ -40,9 +120,20 @@ function tagTone(tag: 'accent' | 'warn' | 'neutral') {
     return 'neutral';
 }
 
-export function HistoryThreadTable({items, selectedIds, toggleSelected}: { items: HistoryThread[]; selectedIds: string[]; toggleSelected: (threadID: string) => void }) {
+export function HistoryThreadTable({
+    items,
+    scanWorkspace,
+    selectedIds,
+    toggleSelected,
+}: {
+    items: HistoryThread[];
+    scanWorkspace: WorkspaceState;
+    selectedIds: string[];
+    toggleSelected: (threadID: string) => void;
+}) {
     if (items.length === 0) return <div className="空态 小号">没有匹配会话</div>;
     const selected = new Set(selectedIds);
+    const hints = duplicateHints(scanWorkspace);
     return (
         <div className="表格壳 会话表壳">
             <div className="列表表头">
@@ -55,6 +146,7 @@ export function HistoryThreadTable({items, selectedIds, toggleSelected}: { items
                     const isSelected = selected.has(item.id);
                     const preview = threadPreview(item);
                     const badge = threadBadge(item, isSelected);
+                    const duplicateHint = hints.get(item.id) ?? hints.get(item.rolloutPath);
                     return (
                         <label className={`会话行 ${isSelected ? '已选行' : ''}`} key={item.id}>
                             <div className="会话勾选">
@@ -69,7 +161,15 @@ export function HistoryThreadTable({items, selectedIds, toggleSelected}: { items
                                 <div className="候选主值" title={item.title || '未命名会话'}>{item.title || '未命名会话'}</div>
                                 <div className="候选副值" title={preview}>{preview}</div>
                                 <div className="会话元信息">
-                                    {rowMeta(item).map((meta) => <span key={`${item.id}:${meta}`}>{meta}</span>)}
+                                    {rowMeta(item, duplicateHint).map((meta) => (
+                                        <span
+                                            className={`会话元信息项 ${meta.tone}${meta.variant ? ` ${meta.tone}-${meta.variant}` : ''}`}
+                                            key={`${item.id}:${meta.key}`}
+                                            title={meta.text}
+                                        >
+                                            {meta.text}
+                                        </span>
+                                    ))}
                                 </div>
                             </div>
                             <div className="会话状态">
