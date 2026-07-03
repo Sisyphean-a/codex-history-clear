@@ -52,7 +52,7 @@ function StatusTag({tone, text}: { tone: 'neutral' | 'warn' | 'accent'; text: st
 
 function WarningList({warnings}: { warnings: string[] }) {
     const rows = warnings ?? [];
-    if (rows.length === 0) return <div className="空态 小号">无 warning</div>;
+    if (rows.length === 0) return <div className="空态 小号">无提示</div>;
     return (
         <div className="告警列">
             {rows.map((warning) => (
@@ -106,7 +106,7 @@ function CandidateTable({candidates}: { candidates: GroupCandidate[] }) {
                 {candidates.map((candidate) => (
                     <tr key={candidate.sourcePath}>
                         <td>
-                            <div className="候选主值">{candidate.preferred ? 'preferred' : candidate.reasonCode}</div>
+                            <div className="候选主值">{candidate.preferred ? '保留' : candidate.reasonCode}</div>
                             <div className="候选副值">{candidate.reason}</div>
                         </td>
                         <td><StatusTag text={relationLabels[candidate.relation] ?? candidate.relation} tone={candidate.preferred ? 'accent' : 'neutral'}/></td>
@@ -131,7 +131,7 @@ function GroupList({groups}: { groups: DuplicateGroup[] }) {
                             <strong>{group.duplicateGroup}</strong>
                             <div className="候选副值">{group.preferredPath}</div>
                         </div>
-                        <StatusTag text={group.reviewNeeded ? 'review-needed' : 'stable'} tone={group.reviewNeeded ? 'warn' : 'accent'}/>
+                        <StatusTag text={group.reviewNeeded ? '需复核' : '稳定'} tone={group.reviewNeeded ? 'warn' : 'accent'}/>
                     </header>
                     {group.warning ? <div className="告警项">{group.warning}</div> : null}
                     <CandidateTable candidates={group.candidates}/>
@@ -186,8 +186,8 @@ function WorkspaceOverview({scan, plan}: { scan: ScanResult; plan: DeletePlanRes
 
             <article className="面板">
                 <header className="面板头">
-                    <h2>计划 warning</h2>
-                    <StatusTag text="只读复核" tone="neutral"/>
+                    <h2>计划提示</h2>
+                    <StatusTag text="只读" tone="neutral"/>
                 </header>
                 <WarningList warnings={plan.warnings}/>
             </article>
@@ -199,7 +199,7 @@ function ReadyWorkspace({scan, plan}: { scan: ScanResult; plan: DeletePlanResult
     return (
         <div className="结果区">
             <section className="指标网格">
-                <MetricCard label="扫描目录" value={scan.summary.rootCount}/>
+                <MetricCard label="扫描根" value={scan.summary.rootCount}/>
                 <MetricCard label="扫描对象" value={scan.summary.itemCount}/>
                 <MetricCard label="重复组" value={plan.summary.groupCount}/>
                 <MetricCard label="计划项" value={plan.summary.plannedCount}/>
@@ -211,7 +211,7 @@ function ReadyWorkspace({scan, plan}: { scan: ScanResult; plan: DeletePlanResult
             <article className="面板">
                 <header className="面板头">
                     <h2>删除计划</h2>
-                    <StatusTag text="approved=false" tone="warn"/>
+                    <StatusTag text="待确认" tone="warn"/>
                 </header>
                 <PlanTable items={plan.items}/>
             </article>

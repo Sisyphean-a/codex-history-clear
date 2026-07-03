@@ -1,196 +1,324 @@
-.向导壳,
-.策略栏,
-.主内容列,
-.会话区,
-.计划区,
-.高级网格 {
-    display: grid;
-    gap: 14px;
-}
-
-.向导顶部,
-.目录条,
-.顶栏动作,
-.会话元信息 {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-}
-
-.向导顶部 {
-    padding: 18px;
-    border: 1px solid rgba(141, 175, 168, 0.35);
-    border-radius: 22px;
-    background: rgba(255, 255, 255, 0.88);
-    box-shadow: 0 16px 44px rgba(18, 56, 60, 0.08);
-    backdrop-filter: blur(10px);
-}
-
-.标题区 {
-    display: grid;
-    gap: 10px;
-}
-
-.标题区 h1 {
-    margin: 0;
-    font-size: 30px;
-    line-height: 1.05;
-}
-
-.标题区 p,
-.策略项 small,
-.会话目录,
-.会话元信息 {
-    color: #56747a;
-}
-
-.目录条 {
-    justify-content: flex-start;
-    flex-wrap: wrap;
-    font-size: 13px;
-}
-
-.顶栏动作 {
-    grid-auto-flow: column;
-    justify-content: start;
-}
-
-.总览网格 {
-    display: grid;
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-    gap: 12px;
-}
-
-.内容栅格 {
-    display: grid;
-    grid-template-columns: minmax(300px, 360px) minmax(0, 1fr);
-    gap: 16px;
-    align-items: start;
-}
-
-.策略组 {
-    display: grid;
-    gap: 10px;
-}
-
-.策略项 {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    gap: 10px;
-    align-items: start;
-    padding: 12px;
-    border-radius: 16px;
-    background: #f7fbfa;
-}
-
-.策略项 strong {
-    display: block;
-    margin-bottom: 4px;
-    font-size: 14px;
-}
-
-.会话列表 {
-    max-height: 430px;
-    overflow: auto;
-}
-
-.会话卡 {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    gap: 12px;
-    padding: 14px;
-    border: 1px solid #dce8e4;
-    border-radius: 18px;
-    background: #fbfefd;
-}
-
-.会话卡.选中 {
-    border-color: #0f766e;
-    box-shadow: inset 0 0 0 1px rgba(15, 118, 110, 0.22);
-}
-
-.会话主体,
-.标签列,
-.摘要列 {
+.工具壳,
+.主工作区,
+.工具侧栏,
+.控制面板,
+.控制分组,
+.执行区,
+.执行后操作,
+.高级网格,
+.概览面板 {
     display: grid;
     gap: 8px;
 }
 
-.会话目录 {
-    overflow-wrap: anywhere;
-    font-size: 13px;
+.工具壳 {
+    min-height: calc(100vh - 20px);
 }
 
-.会话元信息 {
-    justify-content: flex-start;
+.工具栏 {
+    padding: 10px 12px;
+}
+
+.标题栏,
+.按钮组,
+.分组头,
+.策略切换,
+.表格次信息 {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.标题栏,
+.分组头,
+.面板头 {
+    justify-content: space-between;
+}
+
+.标题栏,
+.按钮组,
+.次信息 {
     flex-wrap: wrap;
+}
+
+.标题簇 {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+}
+
+.标题簇 h1,
+.分组头 h2,
+.面板头 h2 {
+    margin: 0;
+}
+
+.标题簇 h1 {
+    font-size: 17px;
+    line-height: 1.1;
+}
+
+.工具说明,
+.说明行,
+.候选副值,
+.表格次信息,
+.字段 span {
+    color: var(--muted);
+    font-size: 11px;
+}
+
+.工具说明 {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+}
+
+.工具说明 code {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.主工作区 {
+    grid-template-columns: 252px minmax(0, 1fr) 320px;
+    align-items: start;
+}
+
+.工具侧栏,
+.计划面板 {
+    position: sticky;
+    top: 8px;
+}
+
+.概览网格 {
+    display: grid;
+    gap: 4px;
+}
+
+.概览网格 .数据行 {
+    grid-template-columns: 64px minmax(0, 1fr);
+}
+
+.控制面板 {
+    padding: 10px 12px;
+}
+
+.控制分组 {
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+}
+
+.控制分组:last-child {
+    padding-bottom: 0;
+    border-bottom: 0;
+}
+
+.策略切换 {
+    flex-wrap: wrap;
+}
+
+.策略按钮 {
+    min-height: 30px;
+    padding: 0 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--panel-soft);
+    color: var(--muted);
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease;
     font-size: 12px;
 }
 
-.标签列 {
-    grid-template-columns: repeat(auto-fit, minmax(96px, max-content));
+.策略按钮.选中 {
+    border-color: var(--primary);
+    background: rgba(59, 130, 246, 0.14);
+    color: var(--text);
 }
 
-.危险提示,
-.执行提示 {
-    padding: 12px 14px;
-    border-radius: 16px;
+.筛选网格,
+.选项网格 {
+    display: grid;
+    gap: 6px;
 }
 
-.危险提示 {
-    border: 1px solid #f1d3a6;
-    background: #fff8ef;
-    color: #9b5d0d;
+.字段 {
+    display: grid;
+    gap: 4px;
 }
 
-.执行提示 {
-    border: 1px solid #b7e2d8;
-    background: #edf9f5;
+.开关项 {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 30px;
+    padding: 0 8px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--panel-soft);
 }
 
-.摘要列 {
-    margin: 0;
-    padding-left: 18px;
+.开关项 span {
+    font-size: 12px;
+}
+
+.列表面板,
+.计划面板 {
+    min-width: 0;
+}
+
+.会话表壳 {
+    max-height: min(76vh, 960px);
+}
+
+.已选行 td {
+    background: rgba(59, 130, 246, 0.08);
+}
+
+.会话表 .列-选择 {
+    width: 38px;
+}
+
+.会话表 .列-会话 {
+    width: 36%;
+}
+
+.会话表 .列-项目 {
+    width: 30%;
+}
+
+.会话表 .列-时间 {
+    width: 84px;
+}
+
+.会话表 .列-大小 {
+    width: 72px;
+}
+
+.会话表 .列-状态 {
+    width: 148px;
+}
+
+.会话标题单元 {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+}
+
+.会话标题单元 .候选主值,
+.会话标题单元 .候选副值,
+.表格次信息 span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.表格次信息 {
+    min-width: 0;
+    flex-wrap: nowrap;
+}
+
+.表格标签列 {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px;
+}
+
+.摘要数据 .数据行 {
+    grid-template-columns: 64px minmax(0, 1fr);
+}
+
+.执行区 > .主按钮 {
+    width: 100%;
+}
+
+.执行区 .操作列,
+.执行后操作 .操作列 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.告警列 {
+    max-height: 160px;
+    overflow: auto;
 }
 
 .高级折叠 summary {
     cursor: pointer;
     font-weight: 700;
+    font-size: 12px;
 }
 
 .高级网格 {
-    margin-top: 14px;
-}
-
-.会话区,
-.计划区 {
-    min-height: 0;
+    margin-top: 8px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .高级网格 > .面板 {
     min-width: 0;
 }
 
-@media (max-width: 1200px) {
-    .总览网格 {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+@media (max-width: 1360px) {
+    .主工作区 {
+        grid-template-columns: 232px minmax(0, 1fr) 296px;
+    }
+}
+
+@media (max-width: 1180px) {
+    .主工作区 {
+        grid-template-columns: minmax(0, 1fr) 296px;
     }
 
-    .内容栅格 {
+    .工具侧栏 {
+        grid-column: 1 / -1;
+        position: static;
+    }
+
+    .工具侧栏 {
+        grid-template-columns: 252px minmax(0, 1fr);
+    }
+
+    .控制分组 {
+        padding-bottom: 6px;
+    }
+}
+
+@media (max-width: 920px) {
+    .主工作区,
+    .工具侧栏,
+    .高级网格 {
         grid-template-columns: 1fr;
+    }
+
+    .计划面板 {
+        position: static;
     }
 }
 
 @media (max-width: 760px) {
-    .向导顶部,
-    .顶栏动作 {
-        align-items: stretch;
-        grid-auto-flow: row;
-        display: grid;
+    .工具栏,
+    .控制面板 {
+        padding: 8px;
     }
 
-    .总览网格 {
+    .标题栏,
+    .按钮组,
+    .分组头 {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .策略切换 {
+        display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .执行区 .操作列,
+    .执行后操作 .操作列 {
+        grid-template-columns: 1fr;
+    }
+
+    .会话表 .列-项目,
+    .会话表 .列-状态 {
+        width: 140px;
     }
 }
