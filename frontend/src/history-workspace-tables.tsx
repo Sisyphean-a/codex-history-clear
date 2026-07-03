@@ -1,4 +1,4 @@
-import {buildThreadTags, formatBytes, formatDateTime, projectLabel} from './history-workspace-helpers';
+import {formatBytes, formatDateTime, projectLabel} from './history-workspace-helpers';
 import type {
     HistoryExecutionResult,
     HistoryPlanResult,
@@ -22,16 +22,21 @@ function threadPreview(item: HistoryThread) {
     return item.preview.trim() || item.firstUserMessage.trim() || item.sourceTitle.trim() || '—';
 }
 
-function compactThreadTags(item: HistoryThread, selected: boolean) {
-    const tags = buildThreadTags(item, selected ? [item.id] : [])
-        .map((tag) => tag === '建议清理' ? '待处理' : tag)
-        .filter((tag) => tag !== '建议保留');
-    return Array.from(new Set(tags)).slice(0, 3);
+function threadBadge(item: HistoryThread, selected: boolean): { label: string; tone: 'accent' | 'warn' | 'neutral' } {
+    if (selected) return {label: '建议清理', tone: 'accent'};
+    if (!item.rolloutPath) return {label: '未知结构', tone: 'warn'};
+    if (item.archived) return {label: '已归档', tone: 'neutral'};
+    if (item.sizeBytes >= 50 * 1024 * 1024) return {label: '大文件', tone: 'warn'};
+    return {label: '建议保留', tone: 'neutral'};
 }
 
-function tagTone(tag: string) {
-    if (tag === '待处理') return 'accent';
-    if (tag === '未知结构') return 'warn';
+function rowMeta(item: HistoryThread) {
+    return [projectLabel(item), formatDateTime(item.updatedAt), formatBytes(item.sizeBytes)].filter(Boolean);
+}
+
+function tagTone(tag: 'accent' | 'warn' | 'neutral') {
+    if (tag === 'accent') return 'accent';
+    if (tag === 'warn') return 'warn';
     return 'neutral';
 }
 
@@ -40,60 +45,40 @@ export function HistoryThreadTable({items, selectedIds, toggleSelected}: { items
     const selected = new Set(selectedIds);
     return (
         <div className="表格壳 会话表壳">
-            <table className="结果表格 会话表">
-                <thead>
-                <tr>
-                    <th className="列-选择">选</th>
-                    <th className="列-会话">会话</th>
-                    <th className="列-项目">项目</th>
-                    <th className="列-时间">更新时间</th>
-                    <th className="列-大小">大小</th>
-                    <th className="列-状态">状态</th>
-                </tr>
-                </thead>
-                <tbody>
+            <div className="列表表头">
+                <label className="行勾选头"><input aria-label="只读标题" checked={selected.size > 0} readOnly type="checkbox"/></label>
+                <span>标题 / 摘要</span>
+                <span>状态</span>
+            </div>
+            <div className="会话列表">
                 {items.map((item) => {
                     const isSelected = selected.has(item.id);
-                    const project = projectLabel(item);
                     const preview = threadPreview(item);
-                    const tags = compactThreadTags(item, isSelected);
+                    const badge = threadBadge(item, isSelected);
                     return (
-                        <tr className={isSelected ? '已选行' : ''} key={item.id}>
-                            <td className="列-选择">
+                        <label className={`会话行 ${isSelected ? '已选行' : ''}`} key={item.id}>
+                            <div className="会话勾选">
                                 <input
                                     aria-label={`选择会话 ${item.title || shortID(item.id)}`}
                                     checked={isSelected}
                                     onChange={() => toggleSelected(item.id)}
                                     type="checkbox"
                                 />
-                            </td>
-                            <td className="列-会话">
-                                <div className="会话标题单元">
-                                    <div className="候选主值" title={item.title || '未命名会话'}>{item.title || '未命名会话'}</div>
-                                    <div className="候选副值" title={preview}>{preview}</div>
-                                    <div className="表格次信息">
-                                        <code title={item.id}>{shortID(item.id)}</code>
-                                        {item.sourceTitle && item.sourceTitle !== item.title ? <span title={item.sourceTitle}>{item.sourceTitle}</span> : null}
-                                    </div>
+                            </div>
+                            <div className="会话主体">
+                                <div className="候选主值" title={item.title || '未命名会话'}>{item.title || '未命名会话'}</div>
+                                <div className="候选副值" title={preview}>{preview}</div>
+                                <div className="会话元信息">
+                                    {rowMeta(item).map((meta) => <span key={`${item.id}:${meta}`}>{meta}</span>)}
                                 </div>
-                            </td>
-                            <td className="列-项目 路径列"><code title={project}>{project}</code></td>
-                            <td className="列-时间">{formatDateTime(item.updatedAt)}</td>
-                            <td className="列-大小">{formatBytes(item.sizeBytes)}</td>
-                            <td className="列-状态">
-                                <div className="表格标签列">
-                                    {tags.map((tag) => (
-                                        <span className={`状态签 ${tagTone(tag)}`} key={`${item.id}:${tag}`}>
-                                            {tag}
-                                        </span>
-                                    ))}
-                                </div>
-                            </td>
-                        </tr>
+                            </div>
+                            <div className="会话状态">
+                                <span className={`状态签 ${tagTone(badge.tone)}`}>{badge.label}</span>
+                            </div>
+                        </label>
                     );
                 })}
-                </tbody>
-            </table>
+            </div>
         </div>
     );
 }
