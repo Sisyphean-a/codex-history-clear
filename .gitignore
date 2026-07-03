@@ -3,3 +3,4 @@ node_modules
 frontend/dist
 .codegraph
 .codex
+.package.json.md5

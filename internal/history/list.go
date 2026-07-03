@@ -18,7 +18,7 @@ type threadRow struct {
 	Title            string
 	Source           string
 	ModelProvider    string
-	ThreadSource     string
+	ThreadSource     sql.NullString
 	RolloutPath      string
 	CreatedAt        int64
 	UpdatedAt        int64
@@ -193,7 +193,7 @@ func mapThreadRow(paths codexPaths, row threadRow, sessionIndex map[string]sessi
 		SourceTitle:      sourceTitle,
 		Source:           row.Source,
 		ModelProvider:    row.ModelProvider,
-		ThreadSource:     row.ThreadSource,
+		ThreadSource:     nullableString(row.ThreadSource),
 		RolloutPath:      row.RolloutPath,
 		CreatedAt:        formatUnix(row.CreatedAtMS, row.CreatedAt),
 		UpdatedAt:        formatUnix(row.UpdatedAtMS, row.UpdatedAt),
@@ -250,6 +250,13 @@ func formatUnix(ms sql.NullInt64, seconds int64) string {
 		return time.UnixMilli(ms.Int64).UTC().Format(time.RFC3339)
 	}
 	return time.Unix(seconds, 0).UTC().Format(time.RFC3339)
+}
+
+func nullableString(value sql.NullString) string {
+	if value.Valid {
+		return value.String
+	}
+	return ""
 }
 
 func escapeLike(value string) string {

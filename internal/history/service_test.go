@@ -38,6 +38,28 @@ func TestListThreadsWithoutLimitReturnsAll(t *testing.T) {
 	}
 }
 
+func TestListThreadsAllowsNullThreadSource(t *testing.T) {
+	service := newFixtureService(t)
+	paths, err := service.resolvePaths()
+	if err != nil {
+		t.Fatalf("resolvePaths() error = %v", err)
+	}
+	db, err := openDatabase(paths.stateDB)
+	if err != nil {
+		t.Fatalf("openDatabase() error = %v", err)
+	}
+	defer db.Close()
+	mustExec(t, db, `update threads set thread_source = null where id = ?`, testThreadID)
+
+	result, err := service.ListThreads(ListRequest{Limit: 10})
+	if err != nil {
+		t.Fatalf("ListThreads() error = %v", err)
+	}
+	if result.Items[0].ThreadSource != "" {
+		t.Fatalf("ListThreads() threadSource = %q", result.Items[0].ThreadSource)
+	}
+}
+
 func TestBuildDeletePlanCreatesArtifact(t *testing.T) {
 	service := newFixtureService(t)
 
