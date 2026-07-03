@@ -134,10 +134,10 @@ export function buildRiskNotes(args: {
     const includesActive = args.threads.some((thread) => selected.has(thread.id) && !thread.archived);
     if (!args.autoBackup) notes.push('已关闭删除前自动备份，真正清理后将不能一键恢复。');
     if (includesActive) notes.push('本次包含未归档会话，删除后将直接改写本地索引。');
-    if (args.unknownCount > 0) notes.push(`扫描中发现 ${args.unknownCount} 个未知结构文件，建议先看高级详情。`);
+    if (args.unknownCount > 0) notes.push(`扫描中发现 ${args.unknownCount} 个未知结构文件，建议先导出报告再确认删除。`);
     if (!args.keepRecent) notes.push('已关闭最近 30 天保护，容易误删刚用过的会话。');
     if ((args.planResult?.warnings.length ?? 0) > 0) notes.push(args.planResult?.warnings[0] ?? '');
-    if (notes.length === 0) notes.push('本次按默认安全策略执行，删除前会先备份，删除后可在高级详情里恢复。');
+    if (notes.length === 0) notes.push('本次按默认安全策略执行，删除前会先备份，删除后可按备份恢复。');
     return notes;
 }
 

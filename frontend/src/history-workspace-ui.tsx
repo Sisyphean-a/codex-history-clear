@@ -1,44 +1,133 @@
 import packageInfo from '../package.json';
 import type {ReactNode, SelectHTMLAttributes} from 'react';
+import {HistoryPlanTargetTable} from './history-workspace-tables';
 import type {HistoryWorkspaceController} from './history-workspace-controller';
 
 const appVersion = packageInfo.version === '0.0.0' ? '预览版' : `v${packageInfo.version}`;
 
-export function ToolbarPanel(props: HistoryWorkspaceController) {
+type ToolbarPanelProps = HistoryWorkspaceController & { onOpenPreview: () => void };
+type DeletePreviewDialogProps = HistoryWorkspaceController & { open: boolean; onClose: () => void };
+
+export function ToolbarPanel(props: ToolbarPanelProps) {
     const scanText = props.loading === 'scan' ? '扫描中' : props.scanWorkspace.kind === 'idle' ? '开始扫描' : '重新扫描';
-    const rootPath = props.workspaceConfig?.codexHome ?? '读取中';
+    const plan = props.planState.planResult;
+    const execution = props.planState.executionResult;
+    const targetCount = plan?.summary.targetCount ?? props.selectedIds.length;
+    const previewText = props.loading === 'plan' ? '生成预览中' : '删除预览';
     return (
-        <header className="顶部栏 面板">
-            <div className="品牌区">
-                <div className="品牌图标"><Icon path="M4 3.5A2.5 2.5 0 0 1 6.5 1h3A2.5 2.5 0 0 1 12 3.5v9A2.5 2.5 0 0 1 9.5 15h-3A2.5 2.5 0 0 1 4 12.5v-9Zm2.5-.75a.75.75 0 0 0-.75.75v1.25h4.5V3.5a.75.75 0 0 0-.75-.75h-3Zm3.75 3.75h-4.5v2.25h4.5V6.5Zm-4.5 4v2a.75.75 0 0 0 .75.75h3a.75.75 0 0 0 .75-.75v-2h-4.5Z"/></div>
-                <div className="品牌文案">
-                    <div className="标题行">
-                        <h1>Codex 历史清理器</h1>
-                        <span className="版本标">{appVersion}</span>
-                    </div>
-                    <div className="路径说明">
-                        <span>当前目录</span>
-                        <code title={rootPath}>{rootPath}</code>
-                    </div>
+        <header className="顶部操作区 面板">
+            <div className="顶部主行">
+                <div className="顶部按钮组">
+                    <ToolbarButton disabled={props.loading === 'directory'} icon="folder" onClick={props.actions.changeDirectory} text="更换目录"/>
+                    <ToolbarButton icon="archive" onClick={props.actions.openBackupDirectory} text="打开备份目录"/>
+                    <ToolbarButton disabled={props.loading === 'scan'} icon="refresh" onClick={props.actions.startScan} text={scanText} tone="primary"/>
+                    <ToolbarButton
+                        disabled={props.selectedIds.length === 0 || props.loading === 'plan'}
+                        icon="trash"
+                        onClick={props.onOpenPreview}
+                        text={previewText}
+                    />
+                </div>
+                <div className="顶部摘要行">
+                    <InlineSummaryItem label="将删除" value={`${targetCount} 条会话`}/>
+                    <InlineSummaryItem label="预计释放" value={props.overview.releaseText}/>
                 </div>
             </div>
-            <div className="标题分隔线"/>
-            <div className="顶部按钮组">
-                <ToolbarButton disabled={props.loading === 'directory'} icon="folder" onClick={props.actions.changeDirectory} text="更换目录"/>
-                <ToolbarButton icon="archive" onClick={props.actions.openBackupDirectory} text="打开备份目录"/>
-                <ToolbarButton disabled={props.loading === 'scan'} icon="refresh" onClick={props.actions.startScan} primary text={scanText}/>
-            </div>
+            {execution ? (
+                <div className="顶部次行">
+                    <span className={`状态签 ${execution.verification.success ? 'accent' : 'warn'}`}>{execution.verification.summary}</span>
+                    <div className="顶部次操作">
+                        <button
+                            className="次按钮"
+                            disabled={props.loading === 'rollback' || execution.rollbackJournalPath === ''}
+                            onClick={props.actions.rollbackPlan}
+                            type="button"
+                        >
+                            按备份恢复
+                        </button>
+                        <button className="次按钮" disabled={props.loading === 'export'} onClick={props.actions.exportEvidencePack} type="button">
+                            导出报告
+                        </button>
+                    </div>
+                </div>
+            ) : null}
         </header>
+    );
+}
+
+export function DeletePreviewDialog(props: DeletePreviewDialogProps) {
+    if (!props.open) return null;
+    const plan = props.planState.planResult;
+    const targetCount = plan?.summary.targetCount ?? props.selectedIds.length;
+    const backdropClick = props.loading === 'execute' ? undefined : props.onClose;
+    return (
+        <div className="预览遮罩" onClick={backdropClick} role="presentation">
+            <section
+                aria-labelledby="删除预览标题"
+                aria-modal="true"
+                className="预览弹窗 面板"
+                onClick={(event) => event.stopPropagation()}
+                role="dialog"
+            >
+                <header className="弹窗头">
+                    <div>
+                        <h2 id="删除预览标题">删除预览</h2>
+                        <p>真正清理前，先确认这次会动哪些会话和备份路径。</p>
+                    </div>
+                    <button className="图标控件" disabled={props.loading === 'execute'} onClick={props.onClose} title="关闭" type="button">
+                        <Icon path="M4 4 12 12M12 4 4 12"/>
+                    </button>
+                </header>
+                <div className="弹窗摘要">
+                    <SummaryValue label="将删除" value={`${targetCount} 条会话`}/>
+                    <SummaryValue label="预计释放" value={props.overview.releaseText}/>
+                    <SummaryValue code label="备份位置" value={backupText(props)}/>
+                </div>
+                {props.planState.riskNotes.length > 0 ? (
+                    <section className="预览风险">
+                        <strong>执行提示</strong>
+                        <ul>
+                            {props.planState.riskNotes.map((item) => <li key={item}>{item}</li>)}
+                        </ul>
+                    </section>
+                ) : null}
+                <div className="预览表格">
+                    {plan ? <HistoryPlanTargetTable targets={plan.targets}/> : <div className="空态 小号">还没有可展示的预览结果</div>}
+                </div>
+                <footer className="弹窗底栏">
+                    <div className="确认说明">
+                        <strong>二次确认</strong>
+                        <p>输入 {props.confirmPhrase} 后，才能点击真正删除。</p>
+                    </div>
+                    <input
+                        className="输入 确认输入"
+                        onChange={(event) => props.planState.setConfirmText(event.target.value)}
+                        placeholder={`输入 ${props.confirmPhrase}`}
+                        value={props.planState.confirmText}
+                    />
+                    <div className="弹窗操作">
+                        <button className="次按钮" disabled={props.loading === 'execute'} onClick={props.onClose} type="button">取消</button>
+                        <button className="次按钮" disabled={!plan || props.loading === 'execute'} onClick={props.actions.backupPlan} type="button">
+                            {props.loading === 'execute' ? '处理中' : '只备份不删除'}
+                        </button>
+                        <button className="危险按钮" disabled={!props.planState.canConfirm || props.loading === 'execute'} onClick={props.actions.executePlan} type="button">
+                            {props.loading === 'execute' ? '清理中' : '确认删除'}
+                        </button>
+                    </div>
+                </footer>
+            </section>
+        </div>
     );
 }
 
 export function StatusBar(props: HistoryWorkspaceController) {
     const items = [
         scanStatusText(props),
-        `${props.overview.totalSessions} 条会话`,
-        `已选择 ${props.selectedIds.length} 条`,
+        `目录 ${props.workspaceConfig?.codexHome ?? '读取中'}`,
+        `总会话 ${props.overview.totalSessions}`,
+        `当前列表 ${props.visibleThreads.length}`,
+        `已选择 ${props.selectedIds.length}`,
         `预计释放 ${props.overview.releaseText}`,
-        `上次扫描 ${props.overview.latestUpdate}`,
     ];
     return (
         <footer className="状态栏">
@@ -59,12 +148,25 @@ export function SectionHeading({title, badgeText}: { title: string; badgeText?: 
     );
 }
 
-export function ToolbarButton({text, icon, onClick, disabled, primary = false}: { text: string; icon: ToolbarIcon; onClick: () => void; disabled?: boolean; primary?: boolean }) {
-    return <button className={primary ? '主按钮 图标按钮' : '次按钮 图标按钮'} disabled={disabled} onClick={onClick} type="button"><ToolbarGlyph icon={icon}/>{text}</button>;
-}
-
-export function IconButton({icon, onClick, title, active = false, disabled = false}: { icon: ToolbarIcon; onClick: () => void; title: string; active?: boolean; disabled?: boolean }) {
-    return <button className={`图标控件 ${active ? '激活' : ''}`} disabled={disabled} onClick={onClick} title={title} type="button"><ToolbarGlyph icon={icon}/></button>;
+export function ToolbarButton({
+    text,
+    icon,
+    onClick,
+    disabled,
+    tone = 'neutral',
+}: {
+    text: string;
+    icon: ToolbarIcon;
+    onClick: () => void | Promise<void>;
+    disabled?: boolean;
+    tone?: 'neutral' | 'primary' | 'danger';
+}) {
+    const className = tone === 'primary'
+        ? '主按钮 图标按钮'
+        : tone === 'danger'
+            ? '危险按钮 图标按钮'
+            : '次按钮 图标按钮';
+    return <button className={className} disabled={disabled} onClick={onClick} type="button"><ToolbarGlyph icon={icon}/>{text}</button>;
 }
 
 export function MetricRow({label, value, highlight = false, tone, large = false}: { label: string; value: string; highlight?: boolean; tone?: 'success'; large?: boolean }) {
@@ -73,10 +175,6 @@ export function MetricRow({label, value, highlight = false, tone, large = false}
 
 export function DataRow({label, value, code = false}: { label: string; value: string; code?: boolean }) {
     return <div className="数据行"><span>{label}</span>{code ? <code title={value}>{value}</code> : <strong title={value}>{value}</strong>}</div>;
-}
-
-export function InfoBar({text}: { text: string }) {
-    return <div className="信息条"><Icon path="M8 2.5A4.5 4.5 0 1 0 8 11.5 4.5 4.5 0 0 0 8 2.5Zm0 10.5A6 6 0 1 1 8 1a6 6 0 0 1 0 12Zm-.75-3h1.5V6.5h-1.5V10Zm0 2.25h1.5v1.5h-1.5v-1.5Z"/>{text}</div>;
 }
 
 export function Field({children}: { children: ReactNode }) {
@@ -99,15 +197,36 @@ export function scanStatusText(props: HistoryWorkspaceController) {
     return '等待扫描';
 }
 
+function SummaryValue({label, value, code = false}: { label: string; value: string; code?: boolean }) {
+    return (
+        <div className={`摘要槽 ${code ? '摘要槽-路径' : ''}`}>
+            <span>{label}</span>
+            {code ? <code title={value}>{value}</code> : <strong title={value}>{value}</strong>}
+        </div>
+    );
+}
+
+function InlineSummaryItem({label, value, code = false}: { label: string; value: string; code?: boolean }) {
+    return (
+        <div className={`顶部摘要项 ${code ? '顶部摘要项-路径' : ''}`}>
+            <strong>{label}</strong>
+            {code ? <code title={value}>{value}</code> : <span title={value}>{value}</span>}
+        </div>
+    );
+}
+
+function backupText(props: HistoryWorkspaceController) {
+    return props.planState.backupPath || props.workspaceConfig?.backupRoot || '未配置备份目录';
+}
+
 function ToolbarGlyph({icon}: { icon: ToolbarIcon }) {
     const paths: Record<ToolbarIcon, string> = {
         archive: 'M2 4.25h12v2.5H2v-2.5Zm1 3.75h10v5H3V8Zm2 1.5v2h6v-2H5Z',
         folder: 'M1.75 4.5h4.1l1.2 1.4h7.2v5.6a1 1 0 0 1-1 1h-10.5a1 1 0 0 1-1-1V5.5a1 1 0 0 1 1-1Z',
-        list: 'M2.5 4h11v1.5h-11V4Zm0 3.25h11v1.5h-11v-1.5Zm0 3.25h11V12h-11v-1.5Z',
         refresh: 'M12.75 7.5a4.75 4.75 0 1 1-1.52-3.47V2.75h1.5v3.5h-3.5v-1.5h1.1A3.25 3.25 0 1 0 11.25 7.5h1.5Z',
-        spark: 'm8 1.5 1.15 2.65L11.8 5.3 9.15 6.45 8 9.1 6.85 6.45 4.2 5.3l2.65-1.15L8 1.5Zm-4.5 7.75.7 1.55 1.55.7-1.55.7-.7 1.55-.7-1.55-1.55-.7 1.55-.7.7-1.55Zm9 0 .7 1.55 1.55.7-1.55.7-.7 1.55-.7-1.55-1.55-.7 1.55-.7.7-1.55Z',
+        trash: 'M3 4.5h10M6 4.5V3h4v1.5m-5.25 0 .6 8.25h5.3l.6-8.25',
     };
     return <Icon path={paths[icon]}/>;
 }
 
-export type ToolbarIcon = 'archive' | 'folder' | 'list' | 'refresh' | 'spark';
+type ToolbarIcon = 'archive' | 'folder' | 'refresh' | 'trash';

@@ -38,7 +38,7 @@ export function useHistoryWorkspaceController(): HistoryWorkspaceController {
         resetPlanArtifacts,
         refreshWorkspace: workspaceActions.refreshWorkspace,
     });
-    useBoundControllerEffects({store, derived, startScan: workspaceActions.startScan, resetPlanArtifacts});
+    useBoundControllerEffects({store, derived, view: store.view, startScan: workspaceActions.startScan, resetPlanArtifacts});
     return {
         loading: store.loading,
         error: store.error,
@@ -48,7 +48,7 @@ export function useHistoryWorkspaceController(): HistoryWorkspaceController {
         visibleThreads: derived.visibleThreads,
         projectChoices: derived.projectChoices,
         selectedIds: derived.selectedIds,
-        confirmPhrase: 'CLEAN',
+        confirmPhrase: 'DELETE',
         overview: buildOverview({
             allThreads: derived.allThreads,
             selectedIds: derived.selectedIds,

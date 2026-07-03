@@ -29,6 +29,17 @@ import type {
 } from './history-types';
 import type {WorkspaceState} from './workspace-types';
 import {initialViewState, type ViewState} from './history-workspace-view-state';
+
+function selectionResetSignature(view: ViewState) {
+    return [
+        view.archivedFilter,
+        view.projectQuery.trim(),
+        view.ageFilter,
+        view.sizeFilter,
+        view.keepRecent ? 'keep' : 'drop',
+        view.skipUnknown ? 'skip' : 'include',
+    ].join('|');
+}
 export type ControllerStore = {
     view: ViewState;
     setView: Dispatch<SetStateAction<ViewState>>;
@@ -116,6 +127,7 @@ export function useControllerEffects(args: {
     listResult: HistoryListResult | null;
     planSelectionSignature: string;
     selectionSignature: string;
+    selectionResetKey: string;
     resetPlanArtifacts: () => void;
     setView: ControllerStore['setView'];
 }) {
@@ -135,11 +147,17 @@ export function useControllerEffects(args: {
             args.resetPlanArtifacts();
         }
     }, [args.selectionSignature, args.planSelectionSignature]);
+    useEffect(() => {
+        args.setView((current) => current.strategy !== 'manual'
+            ? current
+            : {...current, strategy: 'recommended', manualSelectedIds: []});
+    }, [args.listResult, args.selectionResetKey]);
 }
 
 export function useBoundControllerEffects(args: {
     store: Pick<ControllerStore, 'listResult' | 'planSelectionSignature' | 'setView'>;
     derived: Pick<DerivedWorkspaceData, 'allThreads' | 'projectChoices' | 'selectionSignature'>;
+    view: ViewState;
     startScan: () => Promise<void>;
     resetPlanArtifacts: () => void;
 }) {
@@ -150,6 +168,7 @@ export function useBoundControllerEffects(args: {
         listResult: args.store.listResult,
         planSelectionSignature: args.store.planSelectionSignature,
         selectionSignature: args.derived.selectionSignature,
+        selectionResetKey: selectionResetSignature(args.view),
         resetPlanArtifacts: args.resetPlanArtifacts,
         setView: args.store.setView,
     });

@@ -95,7 +95,7 @@ export function buildPlanState(args: {
         evidencePackResult: args.store.evidencePackResult,
         confirmText: args.view.confirmText,
         setConfirmText: (value: string) => args.setViewValue('confirmText', value),
-        canConfirm: args.view.confirmText.trim() === 'CLEAN',
+        canConfirm: args.view.confirmText.trim() === 'DELETE',
         backupPath: args.view.autoBackup || (args.store.executionResult?.backups.length ?? 0) > 0
             ? backupDirectoryForRun(args.store.workspaceConfig, args.store.executionResult?.runId ?? args.store.planResult?.runId)
             : '',

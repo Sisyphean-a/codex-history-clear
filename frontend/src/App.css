@@ -1,31 +1,35 @@
 .工作台 {
-    --bg: #f3f6f8;
-    --panel: rgba(255, 255, 255, 0.96);
-    --panel-soft: #f7fafc;
-    --panel-muted: #eef4f6;
-    --border: #dce6eb;
-    --border-strong: #c8d7de;
-    --text: #1d2736;
-    --muted: #6f7d90;
-    --primary: #0f9989;
-    --primary-deep: #0a7d71;
-    --primary-soft: #dff4f0;
-    --danger: #d97a53;
-    --danger-deep: #c7653c;
-    --success: #27ae60;
-    --success-soft: #e6f8ec;
-    --warn-bg: #fff7e8;
-    --warn-border: #f0ce8f;
-    --warn-text: #b07318;
+    --bg: #0a1017;
+    --bg-elevated: #0f1621;
+    --panel: rgba(15, 22, 33, 0.96);
+    --panel-soft: #121b28;
+    --panel-muted: #182434;
+    --border: #253243;
+    --border-strong: #324359;
+    --text: #e7edf5;
+    --muted: #91a2ba;
+    --primary: #1fb39d;
+    --primary-deep: #158270;
+    --primary-soft: rgba(31, 179, 157, 0.14);
+    --danger: #ff835c;
+    --danger-deep: #d66743;
+    --danger-soft: rgba(255, 131, 92, 0.12);
+    --success: #6dd4a7;
+    --success-soft: rgba(109, 212, 167, 0.12);
+    --warn-bg: rgba(249, 183, 76, 0.12);
+    --warn-border: rgba(249, 183, 76, 0.28);
+    --warn-text: #f2c66d;
     min-height: 100vh;
     padding: 16px;
-    overflow: auto;
+    overflow: hidden;
     background:
-        radial-gradient(1200px 720px at top left, #ffffff 0%, #f5f8fa 52%, #edf2f5 100%);
+        radial-gradient(960px 640px at 0% 0%, rgba(31, 179, 157, 0.12), transparent 55%),
+        radial-gradient(1080px 720px at 100% 0%, rgba(54, 88, 132, 0.2), transparent 58%),
+        linear-gradient(180deg, #0a1017 0%, #0d141d 100%);
     color: var(--text);
-    color-scheme: light;
+    color-scheme: dark;
     font-size: 12px;
-    font-family: "Segoe UI Variable Text", "Microsoft YaHei UI", "PingFang SC", sans-serif;
+    font-family: "Segoe UI Variable Text", "PingFang SC", "Microsoft YaHei UI", sans-serif;
 }
 
 .数据列,
@@ -33,7 +37,7 @@
 .结果区,
 .组列表 {
     display: grid;
-    gap: 10px;
+    gap: 12px;
 }
 
 .面板头,
@@ -46,17 +50,14 @@
 
 .面板,
 .指标卡,
-.组卡,
-.高级折叠 {
+.组卡 {
     border: 1px solid var(--border);
     border-radius: 18px;
-    background: var(--panel);
-    box-shadow: 0 18px 44px rgba(42, 61, 83, 0.06);
-    backdrop-filter: blur(12px);
+    background: linear-gradient(180deg, rgba(16, 24, 37, 0.98), rgba(12, 18, 28, 0.98));
+    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.24);
 }
 
-.面板,
-.高级折叠 {
+.面板 {
     padding: 16px;
 }
 
@@ -79,7 +80,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    line-height: 1.4;
+    line-height: 1.5;
     font-size: 12px;
 }
 
@@ -87,9 +88,9 @@
 .表格次信息 code {
     padding: 4px 8px;
     border-radius: 10px;
-    background: var(--panel-soft);
+    background: rgba(255, 255, 255, 0.03);
     border: 1px solid var(--border);
-    font-family: "Cascadia Code", "IBM Plex Mono", Consolas, monospace;
+    font-family: "JetBrains Mono", "Cascadia Code", Consolas, monospace;
 }
 
 .路径列 code {
@@ -101,7 +102,6 @@
     padding: 0;
     border: 0;
     background: transparent;
-    font-family: "Cascadia Code", "IBM Plex Mono", Consolas, monospace;
 }
 
 .指标网格 {
@@ -112,45 +112,46 @@
 
 .指标卡 {
     padding: 12px 14px;
-    background: var(--panel-soft);
+    background: rgba(255, 255, 255, 0.02);
 }
 
 .指标名 {
     display: block;
-    font-size: 11px;
     color: var(--muted);
+    font-size: 11px;
 }
 
 .指标值 {
     display: block;
     margin-top: 8px;
-    font-size: 20px;
+    font-size: 18px;
     line-height: 1;
 }
 
 .输入 {
     width: 100%;
-    min-height: 36px;
+    min-height: 38px;
     padding: 0 12px;
     border: 1px solid var(--border);
     border-radius: 12px;
-    background: #fff;
+    background: var(--panel-muted);
     color: var(--text);
     font-size: 12px;
 }
 
 .输入:focus {
     outline: 0;
-    border-color: rgba(15, 153, 137, 0.55);
-    box-shadow: 0 0 0 4px rgba(15, 153, 137, 0.12);
+    border-color: rgba(31, 179, 157, 0.6);
+    box-shadow: 0 0 0 4px rgba(31, 179, 157, 0.12);
 }
 
 .主按钮,
 .次按钮,
 .危险按钮 {
-    min-height: 36px;
+    min-height: 38px;
     padding: 0 14px;
     border-radius: 12px;
+    border: 1px solid var(--border);
     font-weight: 600;
     white-space: nowrap;
     cursor: pointer;
@@ -159,61 +160,74 @@
 }
 
 .主按钮 {
-    border: 1px solid var(--primary);
-    background: var(--primary);
-    color: #fff;
+    border-color: rgba(31, 179, 157, 0.28);
+    background: linear-gradient(180deg, rgba(31, 179, 157, 0.92), rgba(21, 130, 112, 0.92));
+    color: #08110d;
 }
 
 .次按钮 {
-    border: 1px solid var(--border);
-    background: #fff;
+    background: rgba(255, 255, 255, 0.03);
     color: var(--text);
 }
 
 .危险按钮 {
-    border: 1px solid #efddcf;
-    background: #fff4ec;
-    color: #b56440;
+    border-color: rgba(255, 131, 92, 0.26);
+    background: linear-gradient(180deg, rgba(255, 131, 92, 0.2), rgba(255, 131, 92, 0.12));
+    color: #ffd7cb;
 }
 
 .主按钮:hover:enabled {
-    background: var(--primary-deep);
-    border-color: var(--primary-deep);
+    background: linear-gradient(180deg, rgba(31, 179, 157, 1), rgba(21, 130, 112, 1));
 }
 
 .次按钮:hover:enabled {
     border-color: var(--border-strong);
-    background: var(--panel-soft);
+    background: rgba(255, 255, 255, 0.06);
 }
 
 .危险按钮:hover:enabled {
-    border-color: #e0b79f;
-    background: #fee9dd;
-    color: #9f5534;
+    border-color: rgba(255, 131, 92, 0.42);
+    background: linear-gradient(180deg, rgba(255, 131, 92, 0.28), rgba(255, 131, 92, 0.18));
+    color: #ffe3da;
 }
 
 .主按钮:disabled,
 .次按钮:disabled,
-.危险按钮:disabled {
+.危险按钮:disabled,
+.图标控件:disabled {
     cursor: not-allowed;
     opacity: 0.46;
+}
+
+.图标按钮 {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.图标控件 {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--muted);
+}
+
+.图标按钮 svg,
+.图标控件 svg {
+    width: 14px;
+    height: 14px;
 }
 
 .双栏 {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
-}
-
-.次信息 {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-}
-
-.次信息 span {
-    color: var(--muted);
-    font-size: 11px;
 }
 
 .状态签 {
@@ -228,14 +242,14 @@
 
 .状态签.neutral {
     border: 1px solid var(--border);
-    background: #fff;
+    background: rgba(255, 255, 255, 0.04);
     color: var(--muted);
 }
 
 .状态签.accent {
-    border: 1px solid rgba(15, 153, 137, 0.18);
+    border: 1px solid rgba(31, 179, 157, 0.24);
     background: var(--primary-soft);
-    color: var(--primary-deep);
+    color: #73dcc8;
 }
 
 .状态签.warn {
@@ -244,25 +258,11 @@
     color: var(--warn-text);
 }
 
-.告警项 {
-    border: 1px solid var(--warn-border);
-    color: var(--warn-text);
-    padding: 10px 12px;
-    border-radius: 14px;
-    background: var(--warn-bg);
-    font-size: 12px;
-}
-
-.告警列 {
-    display: grid;
-    gap: 8px;
-}
-
 .表格壳 {
     overflow: hidden;
     border: 1px solid var(--border);
-    border-radius: 18px;
-    background: var(--panel-soft);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.02);
 }
 
 .结果表格 {
@@ -274,7 +274,7 @@
 .结果表格 th,
 .结果表格 td {
     padding: 10px 12px;
-    border-bottom: 1px solid rgba(112, 126, 144, 0.12);
+    border-bottom: 1px solid rgba(145, 162, 186, 0.12);
     text-align: left;
     vertical-align: top;
     font-size: 11.5px;
@@ -283,13 +283,13 @@
 .结果表格 th {
     position: sticky;
     top: 0;
-    background: #f8fbfc;
-    color: var(--muted);
     z-index: 1;
+    background: #111a26;
+    color: var(--muted);
 }
 
 .结果表格 tbody tr:hover td {
-    background: rgba(255, 255, 255, 0.72);
+    background: rgba(255, 255, 255, 0.03);
 }
 
 .候选主值 {
@@ -308,14 +308,6 @@
     font-size: 12px;
 }
 
-.组卡 {
-    padding: 12px;
-}
-
-.指标网格.三列 {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
 .空态,
 .错误面板 {
     display: grid;
@@ -327,7 +319,7 @@
 
 .空态 {
     border: 1px dashed var(--border-strong);
-    background: rgba(255, 255, 255, 0.66);
+    background: rgba(255, 255, 255, 0.02);
     color: var(--muted);
 }
 
@@ -336,9 +328,9 @@
 }
 
 .错误面板 {
-    border: 1px solid rgba(205, 116, 74, 0.24);
-    background: #fff1ea;
-    color: #a35230;
+    border: 1px solid rgba(255, 131, 92, 0.26);
+    background: var(--danger-soft);
+    color: #ffd7cb;
     padding: 12px;
 }
 
@@ -355,23 +347,18 @@
 @media (max-width: 760px) {
     .工作台 {
         padding: 10px;
+        overflow: auto;
     }
 
-    .面板头,
-    .操作列 {
-        align-items: stretch;
-        display: grid;
-    }
-
-    .操作列 {
-        grid-auto-flow: row;
+    .数据行 {
+        grid-template-columns: 1fr;
     }
 
     .指标网格 {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-    .数据行 {
-        grid-template-columns: 1fr;
+    .操作列 {
+        grid-auto-flow: row;
     }
 }
