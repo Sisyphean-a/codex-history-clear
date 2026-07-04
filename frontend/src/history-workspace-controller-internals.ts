@@ -12,11 +12,16 @@ import {BrowserOpenURL} from '../wailsjs/runtime/runtime';
 import {approvePlan, buildEvidenceRequest, fetchHistoryThreads, fetchReadOnlyWorkspace, runWithLoading} from './history-workspace-api';
 import type {HistoryLoadingState} from './history-workspace-contract';
 import {
+    analyzeThreadDuplicates,
+    type DuplicateAnalysis,
+} from './history-workspace-duplicates';
+import {
     backupDirectoryForRun,
     createFileUrl,
     filterThreads,
     projectOptions,
     selectedThreadIds,
+    suggestedDeleteThreadIds,
     totalSelectedBytes,
 } from './history-workspace-helpers';
 import type {
@@ -36,6 +41,7 @@ function selectionResetSignature(view: ViewState) {
         view.projectQuery.trim(),
         view.ageFilter,
         view.sizeFilter,
+        view.diagnosisFilter,
         view.keepRecent ? 'keep' : 'drop',
         view.skipUnknown ? 'skip' : 'include',
     ].join('|');
@@ -67,7 +73,9 @@ export type ControllerStore = {
 export type DerivedWorkspaceData = {
     allThreads: HistoryListResult['items'];
     visibleThreads: HistoryListResult['items'];
+    duplicateAnalysis: DuplicateAnalysis;
     projectChoices: string[];
+    visibleSuggestedIds: string[];
     selectedIds: string[];
     selectedSize: number;
     selectionSignature: string;
@@ -93,12 +101,16 @@ export function useControllerStore(): ControllerStore {
 }
 export function useDerivedWorkspaceData(listResult: HistoryListResult | null, scanWorkspace: WorkspaceState, view: ViewState): DerivedWorkspaceData {
     const allThreads = listResult?.items ?? [];
-    const visibleThreads = filterThreads(allThreads, view);
+    const duplicateAnalysis = analyzeThreadDuplicates(allThreads);
+    const visibleThreads = filterThreads(allThreads, view, duplicateAnalysis);
+    const visibleSuggestedIds = suggestedDeleteThreadIds(visibleThreads, duplicateAnalysis);
     const selectedIds = selectedThreadIds(visibleThreads, view);
     return {
         allThreads,
         visibleThreads,
+        duplicateAnalysis,
         projectChoices: projectOptions(allThreads),
+        visibleSuggestedIds,
         selectedIds,
         selectedSize: totalSelectedBytes(visibleThreads, selectedIds),
         selectionSignature: [...selectedIds].sort().join('|'),
@@ -147,11 +159,6 @@ export function useControllerEffects(args: {
             args.resetPlanArtifacts();
         }
     }, [args.selectionSignature, args.planSelectionSignature]);
-    useEffect(() => {
-        args.setView((current) => current.strategy !== 'manual'
-            ? current
-            : {...current, strategy: 'recommended', manualSelectedIds: []});
-    }, [args.listResult, args.selectionResetKey]);
 }
 
 export function useBoundControllerEffects(args: {
@@ -213,6 +220,7 @@ export function useWorkspaceActions(args: { store: ControllerStore; resetPlanArt
 export function useSelectionActions(args: {
     setView: ControllerStore['setView'];
     selectedIds: string[];
+    visibleSuggestedIds: string[];
     strategy: ViewState['strategy'];
     projectChoices: string[];
 }) {
@@ -236,7 +244,10 @@ export function useSelectionActions(args: {
                 : [...current.manualSelectedIds, threadID],
         }));
     };
-    return {chooseStrategy, toggleSelected};
+    const selectSuggested = () => {
+        args.setView((current) => ({...current, strategy: 'manual', manualSelectedIds: args.visibleSuggestedIds}));
+    };
+    return {chooseStrategy, selectSuggested, toggleSelected};
 }
 export function usePlanActions(args: {
     store: ControllerStore;

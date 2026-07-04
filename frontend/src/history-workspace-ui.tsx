@@ -31,6 +31,13 @@ export function ToolbarPanel(props: ToolbarPanelProps) {
                 <div className="顶部操作组">
                     <ToolbarButton icon="settings" onClick={props.onOpenSettings} text="设置"/>
                     <ToolbarButton
+                        disabled={props.overview.suggestedCount === 0}
+                        icon="select"
+                        onClick={props.actions.selectSuggested}
+                        text="选中建议删除"
+                        tone="primary"
+                    />
+                    <ToolbarButton
                         disabled={props.selectedIds.length === 0 || props.loading === 'plan'}
                         icon="trash"
                         onClick={props.onOpenPreview}
@@ -47,16 +54,31 @@ export function ToolbarPanel(props: ToolbarPanelProps) {
 function ToolbarFilters(props: HistoryWorkspaceController) {
     return (
         <div className="顶部筛选行">
-            <ToolbarField label="状态">
+            <ToolbarField label="归档">
                 <select
-                    aria-label="状态筛选"
+                    aria-label="归档筛选"
                     className="输入"
                     onChange={(event) => props.filters.setArchivedFilter(event.target.value as typeof props.filters.archivedFilter)}
                     value={props.filters.archivedFilter}
                 >
-                    <option value="all">全部状态</option>
+                    <option value="all">全部会话</option>
                     <option value="archived">仅已归档</option>
                     <option value="active">仅未归档</option>
+                </select>
+            </ToolbarField>
+            <ToolbarField label="判定">
+                <select
+                    aria-label="重复判定筛选"
+                    className="输入"
+                    onChange={(event) => props.filters.setDiagnosisFilter(event.target.value as typeof props.filters.diagnosisFilter)}
+                    value={props.filters.diagnosisFilter}
+                >
+                    <option value="all">全部判定</option>
+                    <option value="redundant">仅多余项</option>
+                    <option value="similar">仅相似项</option>
+                    <option value="clone">仅克隆项</option>
+                    <option value="duplicate">仅重复项</option>
+                    <option value="delete">仅建议删除</option>
                 </select>
             </ToolbarField>
             <ToolbarField label="项目">
@@ -341,6 +363,7 @@ function ToolbarGlyph({icon}: { icon: ToolbarIcon }) {
         archive: 'M2 4.25h12v2.5H2v-2.5Zm1 3.75h10v5H3V8Zm2 1.5v2h6v-2H5Z',
         folder: 'M1.75 4.5h4.1l1.2 1.4h7.2v5.6a1 1 0 0 1-1 1h-10.5a1 1 0 0 1-1-1V5.5a1 1 0 0 1 1-1Z',
         refresh: 'M12.75 7.5a4.75 4.75 0 1 1-1.52-3.47V2.75h1.5v3.5h-3.5v-1.5h1.1A3.25 3.25 0 1 0 11.25 7.5h1.5Z',
+        select: 'M2.25 3.25h8.5v2h-8.5v-2Zm0 3.75h8.5v2h-8.5v-2Zm0 3.75h5.5v2h-5.5v-2Zm9.2-.9 1.2 1.2 2.6-2.95',
         settings: 'M2.5 4.25h11M4.75 8h6.5M3.5 11.75h9M5.25 3v2.5M10.75 6.75v2.5M7.25 10.5V13',
         trash: 'M3 4.5h10M6 4.5V3h4v1.5m-5.25 0 .6 8.25h5.3l.6-8.25',
     };
@@ -348,9 +371,6 @@ function ToolbarGlyph({icon}: { icon: ToolbarIcon }) {
 }
 
 function toolbarMetrics(props: HistoryWorkspaceController): ToolbarMetric[] {
-    const duplicateCount = props.scanWorkspace.kind === 'ready'
-        ? props.scanWorkspace.plan.groups.reduce((count, group) => count + Math.max(0, group.candidates.length - 1), 0)
-        : 0;
     const scanCount = props.scanWorkspace.kind === 'ready' ? props.scanWorkspace.scan.summary.itemCount : 0;
     const unknownCount = props.scanWorkspace.kind === 'ready' ? props.scanWorkspace.scan.summary.unknownCount : 0;
     return [
@@ -358,7 +378,8 @@ function toolbarMetrics(props: HistoryWorkspaceController): ToolbarMetric[] {
         {label: '目录', value: props.workspaceConfig?.codexHome ?? '读取中', code: true, wide: true},
         {label: '总会话', value: String(props.overview.totalSessions)},
         {label: '已归档', value: String(props.overview.archivedSessions)},
-        {label: '重复项', value: String(duplicateCount)},
+        {label: '判定组', value: String(props.duplicateAnalysis.summary.groupCount)},
+        {label: '建议删除', value: String(props.overview.suggestedCount), tone: props.overview.suggestedCount > 0 ? 'warn' : 'neutral'},
         {label: '扫描对象', value: String(scanCount)},
         {label: '未识别', value: String(unknownCount), tone: unknownCount > 0 ? 'warn' : 'neutral'},
         {label: '已选择', value: String(props.selectedIds.length), tone: props.selectedIds.length > 0 ? 'accent' : 'neutral'},
@@ -382,4 +403,4 @@ function backupText(props: HistoryWorkspaceController) {
     return props.planState.backupPath || props.workspaceConfig?.backupRoot || '未配置备份目录';
 }
 
-type ToolbarIcon = 'archive' | 'folder' | 'refresh' | 'settings' | 'trash';
+type ToolbarIcon = 'archive' | 'folder' | 'refresh' | 'select' | 'settings' | 'trash';

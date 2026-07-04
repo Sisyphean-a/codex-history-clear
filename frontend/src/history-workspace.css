@@ -142,7 +142,7 @@
     box-shadow: none;
 }
 
-.顶部筛选项:nth-child(2) {
+.顶部筛选项:nth-child(3) {
     min-width: 220px;
     flex: 1 1 240px;
 }

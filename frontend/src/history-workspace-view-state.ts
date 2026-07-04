@@ -1,4 +1,5 @@
 import type {AgeFilter, ArchivedFilter, CleanupStrategy, SizeFilter} from './history-workspace-helpers';
+import type {DiagnosisFilter} from './history-workspace-duplicates';
 
 export type ViewState = {
     titleQuery: string;
@@ -6,6 +7,7 @@ export type ViewState = {
     archivedFilter: ArchivedFilter;
     ageFilter: AgeFilter;
     sizeFilter: SizeFilter;
+    diagnosisFilter: DiagnosisFilter;
     strategy: CleanupStrategy;
     selectedProject: string;
     autoBackup: boolean;
@@ -23,7 +25,8 @@ export function initialViewState(): ViewState {
         archivedFilter: 'all',
         ageFilter: 'any',
         sizeFilter: 'any',
-        strategy: 'recommended',
+        diagnosisFilter: 'all',
+        strategy: 'manual',
         selectedProject: '',
         autoBackup: true,
         keepRecent: true,

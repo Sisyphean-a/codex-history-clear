@@ -28,6 +28,7 @@ export function useHistoryWorkspaceController(): HistoryWorkspaceController {
     const selectionActions = useSelectionActions({
         setView: store.setView,
         selectedIds: derived.selectedIds,
+        visibleSuggestedIds: derived.visibleSuggestedIds,
         strategy: store.view.strategy,
         projectChoices: derived.projectChoices,
     });
@@ -46,12 +47,13 @@ export function useHistoryWorkspaceController(): HistoryWorkspaceController {
         scanWorkspace: store.scanWorkspace,
         listResult: store.listResult,
         visibleThreads: derived.visibleThreads,
+        duplicateAnalysis: derived.duplicateAnalysis,
         projectChoices: derived.projectChoices,
         selectedIds: derived.selectedIds,
         confirmPhrase: 'DELETE',
         overview: buildOverview({
             allThreads: derived.allThreads,
-            selectedIds: derived.selectedIds,
+            suggestedCount: derived.visibleSuggestedIds.length,
             selectedSize: derived.selectedSize,
             executionResult: store.executionResult,
         }),

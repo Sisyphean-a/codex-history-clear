@@ -31,9 +31,9 @@
 .列表表头,
 .会话行 {
     display: grid;
-    grid-template-columns: 36px minmax(0, 1fr) 104px;
+    grid-template-columns: 36px minmax(0, 1.1fr) minmax(0, 1.1fr) 220px;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
 }
 
 .列表表头 {
@@ -42,10 +42,6 @@
     color: var(--muted);
     background: rgba(255, 255, 255, 0.02);
     font-size: 11px;
-}
-
-.列表表头 span:last-child {
-    justify-self: end;
 }
 
 .行勾选头,
@@ -88,9 +84,9 @@
 }
 
 .会话状态 {
-    display: flex;
-    justify-content: flex-end;
-    align-self: start;
+    display: grid;
+    gap: 8px;
+    align-self: stretch;
 }
 
 .会话元信息 {
@@ -159,18 +155,65 @@
     background: rgba(255, 178, 153, 0.08);
 }
 
+.会话元信息项.diff {
+    color: #d6b2ff;
+    border-color: rgba(214, 178, 255, 0.18);
+    background: rgba(214, 178, 255, 0.08);
+}
+
+.对比主体 {
+    padding: 12px 14px;
+    border: 1px solid rgba(148, 163, 184, 0.14);
+    border-radius: 14px;
+    background: rgba(15, 23, 42, 0.26);
+}
+
+.对比空态 {
+    min-height: 96px;
+    padding: 12px 14px;
+    border: 1px dashed rgba(148, 163, 184, 0.16);
+    border-radius: 14px;
+    color: var(--muted);
+    display: grid;
+    align-content: center;
+}
+
+.对比差异 {
+    padding-top: 2px;
+}
+
+.建议列 {
+    justify-items: start;
+}
+
+.判定说明,
+.判定补充 {
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+.判定补充 {
+    font-size: 11px;
+}
+
 @media (max-width: 760px) {
     .列表表头,
     .会话行 {
         grid-template-columns: 28px minmax(0, 1fr);
     }
 
-    .会话状态 {
-        grid-column: 2 / 3;
-        justify-content: flex-start;
+    .列表表头 span:nth-child(3),
+    .列表表头 span:nth-child(4) {
+        display: none;
     }
 
-    .列表表头 span:last-child {
-        display: none;
+    .会话行 > :nth-child(3),
+    .会话行 > :nth-child(4) {
+        grid-column: 2 / 3;
+    }
+
+    .会话状态 {
+        padding-top: 6px;
     }
 }

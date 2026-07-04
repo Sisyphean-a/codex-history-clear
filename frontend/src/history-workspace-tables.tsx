@@ -1,10 +1,4 @@
-import {formatBytes, formatDateTime, projectLabel} from './history-workspace-helpers';
-import type {
-    HistoryExecutionResult,
-    HistoryPlanResult,
-    HistoryThread,
-} from './history-types';
-import type {WorkspaceState} from './workspace-types';
+import type {HistoryExecutionResult, HistoryPlanResult} from './history-types';
 
 const actionLabels: Record<string, string> = {
     delete_rows: '删行',
@@ -14,174 +8,6 @@ const actionLabels: Record<string, string> = {
     delete_file: '删文件',
     inspect: '检查',
 };
-
-function shortID(value: string) {
-    return value.slice(0, 8);
-}
-
-function threadPreview(item: HistoryThread) {
-    return item.preview.trim() || item.firstUserMessage.trim() || item.sourceTitle.trim() || '—';
-}
-
-function threadBadge(item: HistoryThread, selected: boolean): { label: string; tone: 'accent' | 'warn' | 'neutral' } {
-    if (selected) return {label: '建议清理', tone: 'accent'};
-    if (!item.rolloutPath) return {label: '未知结构', tone: 'warn'};
-    if (item.archived) return {label: '已归档', tone: 'neutral'};
-    if (item.sizeBytes >= 50 * 1024 * 1024) return {label: '大文件', tone: 'warn'};
-    return {label: '建议保留', tone: 'neutral'};
-}
-
-type MetaTone = 'project' | 'time' | 'size' | 'source' | 'provider' | 'thread' | 'duplicate';
-
-type MetaItem = {
-    key: string;
-    text: string;
-    tone: MetaTone;
-    variant?: string;
-};
-
-type DuplicateHint = {
-    copies: number;
-    reviewNeeded: boolean;
-};
-
-function rowMeta(item: HistoryThread, duplicateHint?: DuplicateHint) {
-    const items: MetaItem[] = [
-        {key: 'project', text: projectLabel(item), tone: 'project'},
-        {key: 'updatedAt', text: formatDateTime(item.updatedAt), tone: 'time'},
-        {key: 'size', text: formatBytes(item.sizeBytes), tone: 'size'},
-    ];
-    const source = sourceLabel(item);
-    if (source !== '') items.push({key: 'source', text: source, tone: 'source'});
-    const provider = providerLabel(item.modelProvider);
-    if (provider !== '') items.push({key: 'provider', text: provider, tone: 'provider', variant: providerVariant(item.modelProvider)});
-    const threadSource = threadSourceLabel(item.threadSource);
-    if (threadSource !== '') items.push({key: 'threadSource', text: threadSource, tone: 'thread'});
-    if (duplicateHint && duplicateHint.copies > 0) {
-        items.push({
-            key: 'duplicate',
-            text: `${duplicateHint.reviewNeeded ? '疑似重复' : '重复副本'} ${duplicateHint.copies}`,
-            tone: 'duplicate',
-            variant: duplicateHint.reviewNeeded ? 'review' : 'stable',
-        });
-    }
-    return items;
-}
-
-function sourceLabel(item: HistoryThread) {
-    if (item.threadSource === 'subagent') return '子代理';
-    if (item.source.trim().startsWith('{')) return '子代理';
-    if (item.source === 'vscode') return 'VSCode';
-    if (item.source === 'cli') return 'CLI';
-    return item.source.trim();
-}
-
-function providerLabel(value: string) {
-    if (value === 'hi_code') return 'Hi Code';
-    if (value === 'openai') return 'OpenAI';
-    if (value === 'custom') return '自定义';
-    return value.trim();
-}
-
-function providerVariant(value: string) {
-    if (value === 'hi_code') return 'hi-code';
-    if (value === 'openai') return 'openai';
-    if (value === 'custom') return 'custom';
-    return 'generic';
-}
-
-function threadSourceLabel(value: string) {
-    if (value === 'subagent') return '派生会话';
-    return '';
-}
-
-function duplicateHints(workspace: WorkspaceState) {
-    const hints = new Map<string, DuplicateHint>();
-    if (workspace.kind !== 'ready') return hints;
-    for (const group of workspace.plan.groups) {
-        const copies = Math.max(0, group.candidates.length - 1);
-        if (copies === 0) continue;
-        for (const candidate of group.candidates) {
-            const keys = [candidate.sessionUid, candidate.sourcePath].filter(Boolean) as string[];
-            for (const key of keys) {
-                const existing = hints.get(key);
-                if (!existing || existing.copies < copies || (existing.reviewNeeded && !group.reviewNeeded)) {
-                    hints.set(key, {copies, reviewNeeded: group.reviewNeeded});
-                }
-            }
-        }
-    }
-    return hints;
-}
-
-function tagTone(tag: 'accent' | 'warn' | 'neutral') {
-    if (tag === 'accent') return 'accent';
-    if (tag === 'warn') return 'warn';
-    return 'neutral';
-}
-
-export function HistoryThreadTable({
-    items,
-    scanWorkspace,
-    selectedIds,
-    toggleSelected,
-}: {
-    items: HistoryThread[];
-    scanWorkspace: WorkspaceState;
-    selectedIds: string[];
-    toggleSelected: (threadID: string) => void;
-}) {
-    if (items.length === 0) return <div className="空态 小号">没有匹配会话</div>;
-    const selected = new Set(selectedIds);
-    const hints = duplicateHints(scanWorkspace);
-    return (
-        <div className="表格壳 会话表壳">
-            <div className="列表表头">
-                <label className="行勾选头"><input aria-label="只读标题" checked={selected.size > 0} readOnly type="checkbox"/></label>
-                <span>标题 / 摘要</span>
-                <span>状态</span>
-            </div>
-            <div className="会话列表">
-                {items.map((item) => {
-                    const isSelected = selected.has(item.id);
-                    const preview = threadPreview(item);
-                    const badge = threadBadge(item, isSelected);
-                    const duplicateHint = hints.get(item.id) ?? hints.get(item.rolloutPath);
-                    return (
-                        <label className={`会话行 ${isSelected ? '已选行' : ''}`} key={item.id}>
-                            <div className="会话勾选">
-                                <input
-                                    aria-label={`选择会话 ${item.title || shortID(item.id)}`}
-                                    checked={isSelected}
-                                    onChange={() => toggleSelected(item.id)}
-                                    type="checkbox"
-                                />
-                            </div>
-                            <div className="会话主体">
-                                <div className="候选主值" title={item.title || '未命名会话'}>{item.title || '未命名会话'}</div>
-                                <div className="候选副值" title={preview}>{preview}</div>
-                                <div className="会话元信息">
-                                    {rowMeta(item, duplicateHint).map((meta) => (
-                                        <span
-                                            className={`会话元信息项 ${meta.tone}${meta.variant ? ` ${meta.tone}-${meta.variant}` : ''}`}
-                                            key={`${item.id}:${meta.key}`}
-                                            title={meta.text}
-                                        >
-                                            {meta.text}
-                                        </span>
-                                    ))}
-                                </div>
-                            </div>
-                            <div className="会话状态">
-                                <span className={`状态签 ${tagTone(badge.tone)}`}>{badge.label}</span>
-                            </div>
-                        </label>
-                    );
-                })}
-            </div>
-        </div>
-    );
-}
 
 export function HistoryPlanTargetTable({targets}: { targets: HistoryPlanResult['targets'] }) {
     if (targets.length === 0) return <div className="空态 小号">当前范围没有可执行目标</div>;
@@ -214,6 +40,17 @@ export function HistoryPlanTargetTable({targets}: { targets: HistoryPlanResult['
     );
 }
 
+export function HistoryExecutionTable({result}: { result: HistoryExecutionResult }) {
+    return (
+        <div className="结果区">
+            <ExecutionSummary result={result}/>
+            <VerificationTable result={result}/>
+            <MutationTable result={result}/>
+            <EventTable result={result}/>
+        </div>
+    );
+}
+
 function ExecutionSummary({result}: { result: HistoryExecutionResult }) {
     return (
         <>
@@ -235,9 +72,7 @@ function ExecutionSummary({result}: { result: HistoryExecutionResult }) {
 }
 
 function VerificationTable({result}: { result: HistoryExecutionResult }) {
-    if (result.verification.remainingReferences.length === 0) {
-        return null;
-    }
+    if (result.verification.remainingReferences.length === 0) return null;
     return (
         <div className="表格壳">
             <table className="结果表格">
@@ -316,13 +151,6 @@ function EventTable({result}: { result: HistoryExecutionResult }) {
     );
 }
 
-export function HistoryExecutionTable({result}: { result: HistoryExecutionResult }) {
-    return (
-        <div className="结果区">
-            <ExecutionSummary result={result}/>
-            <VerificationTable result={result}/>
-            <MutationTable result={result}/>
-            <EventTable result={result}/>
-        </div>
-    );
+function shortID(value: string) {
+    return value.slice(0, 8);
 }

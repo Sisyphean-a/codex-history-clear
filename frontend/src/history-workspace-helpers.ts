@@ -1,4 +1,6 @@
 import type {CleanupWorkspaceConfig, HistoryPlanResult, HistoryThread} from './history-types';
+import type {DiagnosisFilter, DuplicateAnalysis} from './history-workspace-duplicates';
+import {diagnosisFor, isSuggestedDeleteDiagnosis, matchesDiagnosisFilter} from './history-workspace-duplicates';
 
 export type CleanupStrategy = 'recommended' | 'conservative' | 'project' | 'manual';
 export type ArchivedFilter = 'all' | 'archived' | 'active';
@@ -11,6 +13,7 @@ type ThreadFilters = {
     archivedFilter: ArchivedFilter;
     ageFilter: AgeFilter;
     sizeFilter: SizeFilter;
+    diagnosisFilter: DiagnosisFilter;
 };
 
 type SelectionOptions = {
@@ -77,8 +80,8 @@ export function projectOptions(threads: HistoryThread[]) {
     return Array.from(new Set(threads.map(projectLabel))).sort((left, right) => left.localeCompare(right));
 }
 
-export function filterThreads(threads: HistoryThread[], filters: ThreadFilters) {
-    return threads.filter((thread) => matchesThread(thread, filters));
+export function filterThreads(threads: HistoryThread[], filters: ThreadFilters, duplicateAnalysis: DuplicateAnalysis) {
+    return threads.filter((thread) => matchesThread(thread, filters, duplicateAnalysis));
 }
 
 export function selectedThreadIds(threads: HistoryThread[], options: SelectionOptions) {
@@ -121,6 +124,12 @@ export function buildThreadTags(thread: HistoryThread, selectedIds: string[]) {
     return tags;
 }
 
+export function suggestedDeleteThreadIds(threads: HistoryThread[], duplicateAnalysis: DuplicateAnalysis) {
+    return threads
+        .filter((thread) => isSuggestedDeleteDiagnosis(diagnosisFor(duplicateAnalysis, thread.id)))
+        .map((thread) => thread.id);
+}
+
 export function buildRiskNotes(args: {
     autoBackup: boolean;
     selectedIds: string[];
@@ -141,7 +150,7 @@ export function buildRiskNotes(args: {
     return notes;
 }
 
-function matchesThread(thread: HistoryThread, filters: ThreadFilters) {
+function matchesThread(thread: HistoryThread, filters: ThreadFilters, duplicateAnalysis: DuplicateAnalysis) {
     const titleQuery = filters.titleQuery.trim().toLowerCase();
     const projectQuery = filters.projectQuery.trim().toLowerCase();
     const matchesTitle = titleQuery === '' || [thread.title, thread.sourceTitle, thread.preview, thread.firstUserMessage]
@@ -149,11 +158,13 @@ function matchesThread(thread: HistoryThread, filters: ThreadFilters) {
         .toLowerCase()
         .includes(titleQuery);
     const matchesProject = projectQuery === '' || projectLabel(thread).toLowerCase().includes(projectQuery);
+    const diagnosis = diagnosisFor(duplicateAnalysis, thread.id);
     return matchesTitle
         && matchesProject
         && matchesArchived(thread, filters.archivedFilter)
         && matchesAge(thread, filters.ageFilter)
-        && thread.sizeBytes >= sizeThresholds[filters.sizeFilter];
+        && thread.sizeBytes >= sizeThresholds[filters.sizeFilter]
+        && matchesDiagnosisFilter(filters.diagnosisFilter, diagnosis);
 }
 
 function matchesArchived(thread: HistoryThread, archivedFilter: ArchivedFilter) {

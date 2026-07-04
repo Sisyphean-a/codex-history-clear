@@ -12,6 +12,7 @@ type WorkspaceActions = {
 };
 
 type SelectionActions = {
+    selectSuggested: () => void;
     toggleSelected: (threadID: string) => void;
 };
 
@@ -25,7 +26,7 @@ type PlanActions = {
 
 export function buildOverview(args: {
     allThreads: HistoryListResult['items'];
-    selectedIds: string[];
+    suggestedCount: number;
     selectedSize: number;
     executionResult: ControllerStore['executionResult'];
 }) {
@@ -37,7 +38,7 @@ export function buildOverview(args: {
     return {
         totalSessions: args.allThreads.length,
         archivedSessions: args.allThreads.filter((thread) => thread.archived).length,
-        suggestedCount: args.selectedIds.length,
+        suggestedCount: args.suggestedCount,
         releaseText: formatBytes(args.selectedSize),
         latestUpdate: latestUpdatedAt(args.allThreads),
         rollbackText,
@@ -56,6 +57,8 @@ export function buildFilters(view: ViewState, setViewValue: ViewValueSetter) {
         setAgeFilter: (value: ViewState['ageFilter']) => setViewValue('ageFilter', value),
         sizeFilter: view.sizeFilter,
         setSizeFilter: (value: ViewState['sizeFilter']) => setViewValue('sizeFilter', value),
+        diagnosisFilter: view.diagnosisFilter,
+        setDiagnosisFilter: (value: ViewState['diagnosisFilter']) => setViewValue('diagnosisFilter', value),
     };
 }
 

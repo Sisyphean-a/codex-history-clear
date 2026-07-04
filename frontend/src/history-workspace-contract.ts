@@ -1,4 +1,5 @@
 import type {AgeFilter, ArchivedFilter, CleanupStrategy, SizeFilter} from './history-workspace-helpers';
+import type {DiagnosisFilter, DuplicateAnalysis} from './history-workspace-duplicates';
 import type {
     CleanupWorkspaceConfig,
     HistoryEvidencePackResult,
@@ -18,6 +19,7 @@ export type HistoryWorkspaceController = {
     scanWorkspace: WorkspaceState;
     listResult: HistoryListResult | null;
     visibleThreads: HistoryListResult['items'];
+    duplicateAnalysis: DuplicateAnalysis;
     projectChoices: string[];
     selectedIds: string[];
     confirmPhrase: string;
@@ -40,6 +42,8 @@ export type HistoryWorkspaceController = {
         setAgeFilter: (value: AgeFilter) => void;
         sizeFilter: SizeFilter;
         setSizeFilter: (value: SizeFilter) => void;
+        diagnosisFilter: DiagnosisFilter;
+        setDiagnosisFilter: (value: DiagnosisFilter) => void;
     };
     strategyState: {
         strategy: CleanupStrategy;
@@ -71,6 +75,7 @@ export type HistoryWorkspaceController = {
         startScan: () => Promise<void>;
         changeDirectory: () => Promise<void>;
         openBackupDirectory: () => void;
+        selectSuggested: () => void;
         toggleSelected: (threadID: string) => void;
         buildPlan: () => Promise<void>;
         backupPlan: () => Promise<void>;
