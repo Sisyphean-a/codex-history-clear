@@ -1,130 +1,150 @@
-.工具壳,
-.工具侧栏,
-.控制面板,
-.筛选列,
-.安全列,
-.概览列表,
-.主内容列,
-.顶部操作区,
-.顶部摘要行,
-.顶部次行,
-.弹窗摘要,
-.弹窗操作 {
+.工具壳 {
     display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
     gap: 12px;
+    min-height: calc(100vh - var(--workspace-padding));
+    overflow: visible;
 }
 
-.工具壳 {
-    height: calc(100vh - 32px);
+.顶部区 {
+    position: sticky;
+    top: 0;
+    z-index: 12;
+    display: grid;
+    gap: 12px;
     min-height: 0;
-    grid-template-rows: auto auto minmax(0, 1fr) auto;
-    overflow: hidden;
+    margin-inline: calc(var(--workspace-padding) * -1);
 }
 
 .顶部操作区 {
-    padding: 12px 14px;
+    display: grid;
     gap: 10px;
+    padding: 12px var(--workspace-padding);
+    backdrop-filter: blur(14px);
+    border-top: 0;
+    border-left: 0;
+    border-right: 0;
+    border-radius: 0;
 }
 
-.顶部主行,
-.顶部按钮组,
-.顶部次操作,
-.列表头,
-.列表状态组,
-.会话元信息,
-.状态栏,
-.状态列 {
+.顶部信息行,
+.顶部操作组,
+.顶部信息组,
+.顶部筛选行,
+.设置操作组,
+.会话元信息 {
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
-.列表头,
-.状态栏 {
+.顶部信息行 {
     justify-content: space-between;
+    gap: 14px;
 }
 
-.分组头 h2,
-.列表头 h2,
-.面板头 h2,
-.弹窗头 h2 {
-    margin: 0;
+.顶部信息组,
+.顶部筛选行,
+.设置操作组,
+.会话元信息 {
+    flex-wrap: wrap;
 }
 
-.列表头 p,
-.弹窗头 p,
-.确认说明 p,
-.状态栏 span,
-.摘要槽 span {
+.顶部信息组 {
+    flex: 1;
+    min-width: 0;
+}
+
+.顶部信息项 {
+    display: inline-grid;
+    grid-template-columns: auto auto;
+    align-items: center;
+    gap: 8px;
+    min-height: 36px;
+    padding: 0 10px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    min-width: 0;
+}
+
+.顶部信息项 span {
     color: var(--muted);
+    font-size: 11px;
+    white-space: nowrap;
 }
 
-.摘要槽 code {
+.顶部信息项 strong,
+.顶部信息项 code {
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-}
-
-.顶部按钮组 {
-    flex-wrap: nowrap;
-    justify-content: flex-start;
-}
-
-.顶部摘要行 {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-    gap: 10px 16px;
-    flex: 1;
-    min-width: 0;
-    color: var(--muted);
     font-size: 12px;
+    line-height: 1.4;
 }
 
-.顶部摘要项 {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    min-width: 0;
-}
-
-.顶部摘要项 strong {
-    color: var(--text);
-    font-size: 12px;
-}
-
-.摘要槽 {
-    display: grid;
-    gap: 6px;
-    min-width: 0;
-    padding: 12px 14px;
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    background: rgba(255, 255, 255, 0.03);
-}
-
-.摘要槽 strong {
-    font-size: 16px;
-    line-height: 1.2;
-}
-
-.摘要槽-路径 code {
+.顶部信息项 code {
+    padding: 0;
+    border: 0;
+    background: transparent;
     font-family: "JetBrains Mono", "Cascadia Code", Consolas, monospace;
 }
 
-.顶部摘要行 > .图标按钮 {
-    min-width: 140px;
+.顶部信息项-宽 {
+    flex: 1 1 320px;
+    max-width: 520px;
 }
 
-.顶部次行 {
-    grid-template-columns: auto minmax(0, 1fr);
+.顶部信息项-accent {
+    border-color: rgba(31, 179, 157, 0.24);
+    background: rgba(31, 179, 157, 0.12);
+}
+
+.顶部信息项-warn {
+    border-color: var(--warn-border);
+    background: var(--warn-bg);
+}
+
+.顶部筛选行 {
+    row-gap: 8px;
+}
+
+.顶部筛选项 {
+    display: inline-flex;
     align-items: center;
+    gap: 8px;
+    min-width: 140px;
+    min-height: 38px;
+    padding: 4px 8px 4px 10px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.02);
 }
 
-.顶部次操作 {
-    justify-content: flex-end;
-    flex-wrap: wrap;
+.顶部筛选项 span {
+    color: var(--muted);
+    font-size: 11px;
+    white-space: nowrap;
+}
+
+.顶部筛选项 .输入 {
+    min-height: 28px;
+    padding: 0 6px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    box-shadow: none;
+}
+
+.顶部筛选项 .输入:focus {
+    border: 0;
+    box-shadow: none;
+}
+
+.顶部筛选项:nth-child(2) {
+    min-width: 220px;
+    flex: 1 1 240px;
 }
 
 .错误横幅 {
@@ -135,427 +155,42 @@
     color: #ffd7cb;
 }
 
-.主工作区 {
-    display: grid;
-    grid-template-columns: 320px minmax(0, 1fr);
-    gap: 16px;
-    min-height: 0;
-    align-items: start;
-}
-
-.工具侧栏 {
-    align-content: start;
-    min-height: 0;
-    gap: 10px;
-}
-
+.主工作区,
 .主内容列 {
-    display: grid;
-    grid-template-rows: minmax(0, 1fr);
-    min-width: 0;
     min-height: 0;
-    height: var(--workspace-column-height);
-    max-height: var(--workspace-column-height);
-    overflow: hidden;
 }
 
-.控制面板 {
-    padding-top: 0;
-}
-
-.侧栏面板,
-.控制面板 {
-    gap: 10px;
-    padding: 12px 14px;
-}
-
-.侧栏分组 {
-    display: grid;
-    gap: 8px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid var(--border);
-}
-
-.侧栏分组:last-child {
-    padding-bottom: 0;
-    border-bottom: 0;
-}
-
-.分组头 {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-}
-
-.概览列表 {
-    gap: 2px;
-}
-
-.指标行 {
-    grid-template-columns: 78px minmax(0, 1fr);
-    align-items: center;
-    padding: 4px 0;
-}
-
-.勾选项 {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    min-height: 22px;
-}
-
-.勾选项 input,
-.会话勾选 input,
-.行勾选头 input {
-    width: 16px;
-    height: 16px;
-    accent-color: var(--primary);
-}
-
-.列表面板 {
-    display: grid;
-    grid-template-rows: auto minmax(0, 1fr) auto;
-    min-width: 0;
-    min-height: 0;
-    height: 100%;
-    max-height: 100%;
-    padding: 12px 14px;
-    overflow: hidden;
-}
-
-.列表头 {
-    padding-bottom: 4px;
-}
-
-.列表头 p,
-.确认说明 p {
-    margin: 0;
-    font-size: 12px;
-    line-height: 1.5;
-}
-
-.列表状态组 {
-    flex-wrap: wrap;
-    justify-content: flex-end;
-}
-
-.会话表壳 {
-    display: grid;
-    grid-template-rows: auto minmax(0, 1fr);
-    min-height: 0;
-    height: 100%;
-    max-height: 100%;
-    overflow: hidden;
-}
-
-.列表表头,
-.会话行,
-.列表底栏 {
-    display: grid;
-    grid-template-columns: 36px minmax(0, 1fr) 104px;
-    align-items: center;
-    gap: 8px;
-}
-
-.列表表头 {
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--border);
-    color: var(--muted);
-    background: rgba(255, 255, 255, 0.02);
-    font-size: 11px;
-}
-
-.列表表头 span:last-child,
-.列表底栏 span {
-    justify-self: end;
-}
-
-.行勾选头,
-.会话勾选 {
-    display: flex;
-    justify-content: center;
-}
-
-.会话列表 {
-    min-height: 0;
-    height: 100%;
-    overflow: auto;
-}
-
-.会话行 {
-    padding: 14px 16px;
-    border-bottom: 1px solid rgba(145, 162, 186, 0.1);
-    cursor: pointer;
-    background: rgba(255, 255, 255, 0.01);
-}
-
-.会话行:hover {
-    background: rgba(255, 255, 255, 0.04);
-}
-
-.会话行.已选行 {
-    background: linear-gradient(90deg, rgba(31, 179, 157, 0.16), rgba(31, 179, 157, 0.05));
-}
-
-.会话主体 {
-    min-width: 0;
-    display: grid;
-    gap: 6px;
-}
-
-.会话状态 {
-    display: flex;
-    justify-content: flex-end;
-    align-self: start;
-}
-
-.会话元信息 {
-    flex-wrap: wrap;
-    gap: 8px;
-}
-
-.会话元信息项 {
-    display: inline-flex;
-    align-items: center;
-    min-height: 24px;
-    max-width: 100%;
-    padding: 0 10px;
-    border: 1px solid transparent;
-    border-radius: 999px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    font-size: 11px;
-    font-weight: 600;
-}
-
-.会话元信息项.project {
-    color: #94d9ff;
-    border-color: rgba(148, 217, 255, 0.18);
-    background: rgba(148, 217, 255, 0.08);
-}
-
-.会话元信息项.time {
-    color: #f3cc7b;
-    border-color: rgba(243, 204, 123, 0.2);
-    background: rgba(243, 204, 123, 0.08);
-}
-
-.会话元信息项.size {
-    color: #6fe2cf;
-    border-color: rgba(111, 226, 207, 0.2);
-    background: rgba(111, 226, 207, 0.08);
-}
-
-.会话元信息项.source,
-.会话元信息项.thread {
-    color: #a9bcda;
-    border-color: rgba(169, 188, 218, 0.18);
-    background: rgba(169, 188, 218, 0.08);
-}
-
-.会话元信息项.provider-openai {
-    color: #7ae0a0;
-    border-color: rgba(122, 224, 160, 0.2);
-    background: rgba(122, 224, 160, 0.08);
-}
-
-.会话元信息项.provider-hi-code,
-.会话元信息项.provider-generic,
-.会话元信息项.provider-custom {
-    color: #ffc69b;
-    border-color: rgba(255, 198, 155, 0.18);
-    background: rgba(255, 198, 155, 0.08);
-}
-
-.会话元信息项.duplicate-stable,
-.会话元信息项.duplicate-review,
-.会话元信息项.duplicate {
-    color: #ffb299;
-    border-color: rgba(255, 178, 153, 0.18);
-    background: rgba(255, 178, 153, 0.08);
-}
-
-.列表底栏 {
-    padding: 12px 16px;
-    border-top: 1px solid var(--border);
-    background: rgba(255, 255, 255, 0.02);
-}
-
-.预览遮罩 {
-    position: fixed;
-    inset: 0;
-    display: grid;
-    place-items: center;
-    padding: 24px;
-    background: rgba(4, 8, 12, 0.72);
-    backdrop-filter: blur(4px);
-    z-index: 20;
-}
-
-.预览弹窗 {
-    width: min(980px, 100%);
-    max-height: min(88vh, 920px);
-    overflow: auto;
-    padding: 18px;
-}
-
-.弹窗头 {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 16px;
-}
-
-.弹窗头 p,
-.确认说明 p {
-    margin: 6px 0 0;
-}
-
-.弹窗摘要 {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.预览风险 {
-    padding: 14px 16px;
-    border: 1px solid var(--warn-border);
-    border-radius: 14px;
-    background: var(--warn-bg);
-}
-
-.预览风险 strong {
-    display: block;
-    margin-bottom: 8px;
-    color: var(--warn-text);
-}
-
-.预览风险 ul {
-    margin: 0;
-    padding-left: 18px;
-    color: var(--warn-text);
-}
-
-.预览风险 li + li {
-    margin-top: 6px;
-}
-
-.预览表格 {
-    display: grid;
-    gap: 12px;
-}
-
-.弹窗底栏 {
-    display: grid;
-    gap: 12px;
-    padding-top: 6px;
-}
-
-.确认输入 {
-    min-height: 42px;
-}
-
-.弹窗操作 {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.状态栏 {
-    justify-content: space-between;
-    gap: 16px;
-    padding: 0 2px;
-    font-size: 11px;
-}
-
-.状态列 {
-    flex-wrap: wrap;
-}
-
-.状态列 span + span::before {
-    content: "·";
-    margin-right: 10px;
-    color: #5a6b83;
-}
-
-@media (max-width: 1320px) {
-    .工具壳 {
-        height: auto;
-        overflow: visible;
+@media (max-width: 860px) {
+    .顶部信息行 {
+        flex-direction: column;
+        align-items: stretch;
     }
 
-    .主工作区 {
-        grid-template-columns: 1fr;
+    .顶部操作组 {
+        justify-content: flex-end;
     }
 
-    .工具侧栏 {
-        height: auto;
-    }
-
-    .主内容列,
-    .列表面板 {
-        height: auto;
-        max-height: none;
-    }
-}
-
-@media (max-width: 1080px) {
-    .弹窗摘要 {
-        grid-template-columns: 1fr;
-    }
-
-    .顶部次行 {
-        grid-template-columns: 1fr;
-    }
-
-    .顶部次操作 {
-        justify-content: flex-start;
+    .顶部信息项-宽 {
+        max-width: none;
     }
 }
 
 @media (max-width: 760px) {
-    .顶部操作区,
-    .面板,
-    .预览弹窗 {
+    .工具壳 {
+        min-height: calc(100vh - var(--workspace-padding));
+    }
+
+    .顶部操作区 {
         padding-left: 12px;
         padding-right: 12px;
     }
 
-    .顶部主行,
-    .顶部按钮组,
-    .列表头,
-    .状态栏 {
-        align-items: stretch;
-        flex-direction: column;
-    }
-
-    .顶部按钮组,
-    .列表状态组 {
+    .顶部操作组 {
         justify-content: flex-start;
     }
 
-    .顶部摘要行 {
-        flex: none;
-        align-items: flex-start;
-        flex-direction: column;
-        justify-content: flex-start;
-    }
-
-    .列表表头,
-    .会话行,
-    .列表底栏 {
-        grid-template-columns: 28px minmax(0, 1fr);
-    }
-
-    .会话状态 {
-        grid-column: 2 / 3;
-        justify-content: flex-start;
-    }
-
-    .列表表头 span:last-child,
-    .列表底栏 span {
-        justify-self: start;
-    }
-
-    .弹窗操作 {
-        grid-template-columns: 1fr;
+    .顶部筛选项 {
+        min-width: calc(50% - 5px);
+        flex: 1 1 160px;
     }
 }

@@ -1,4 +1,5 @@
 .工作台 {
+    --workspace-padding: 16px;
     --bg: #0a1017;
     --bg-elevated: #0f1621;
     --panel: rgba(15, 22, 33, 0.96);
@@ -20,8 +21,7 @@
     --warn-border: rgba(249, 183, 76, 0.28);
     --warn-text: #f2c66d;
     min-height: 100vh;
-    padding: 16px;
-    overflow: hidden;
+    padding: 0 var(--workspace-padding) var(--workspace-padding);
     background:
         radial-gradient(960px 640px at 0% 0%, rgba(31, 179, 157, 0.12), transparent 55%),
         radial-gradient(1080px 720px at 100% 0%, rgba(54, 88, 132, 0.2), transparent 58%),
@@ -346,8 +346,7 @@
 
 @media (max-width: 760px) {
     .工作台 {
-        padding: 10px;
-        overflow: auto;
+        --workspace-padding: 10px;
     }
 
     .数据行 {

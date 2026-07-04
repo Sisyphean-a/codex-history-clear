@@ -1,0 +1,164 @@
+.弹窗遮罩 {
+    position: fixed;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    background: rgba(4, 8, 12, 0.72);
+    backdrop-filter: blur(4px);
+    z-index: 20;
+}
+
+.预览弹窗,
+.设置弹窗 {
+    display: grid;
+    gap: 16px;
+    width: min(980px, 100%);
+    max-height: min(88vh, 920px);
+    overflow: auto;
+    padding: 18px;
+}
+
+.设置弹窗 {
+    width: min(780px, 100%);
+}
+
+.弹窗头,
+.分组头 {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.弹窗头 h2,
+.分组头 h3 {
+    margin: 0;
+}
+
+.弹窗头 p,
+.确认说明 p {
+    margin: 6px 0 0;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.弹窗摘要 {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.摘要槽 {
+    display: grid;
+    gap: 6px;
+    min-width: 0;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.摘要槽 span {
+    color: var(--muted);
+}
+
+.摘要槽 strong {
+    font-size: 16px;
+    line-height: 1.2;
+}
+
+.摘要槽 code {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-family: "JetBrains Mono", "Cascadia Code", Consolas, monospace;
+}
+
+.预览风险,
+.设置分组,
+.设置内容,
+.预览表格,
+.弹窗底栏,
+.弹窗操作,
+.设置勾选网格 {
+    display: grid;
+    gap: 12px;
+}
+
+.预览风险,
+.设置分组 {
+    padding: 14px 16px;
+    border-radius: 14px;
+}
+
+.预览风险 {
+    border: 1px solid var(--warn-border);
+    background: var(--warn-bg);
+}
+
+.预览风险 strong,
+.预览风险 ul {
+    color: var(--warn-text);
+}
+
+.预览风险 ul {
+    margin: 0;
+    padding-left: 18px;
+}
+
+.设置分组 {
+    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.设置勾选网格 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.确认输入 {
+    min-height: 42px;
+}
+
+.弹窗操作 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.设置底栏 {
+    grid-template-columns: max-content;
+    justify-content: end;
+}
+
+.勾选项 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 22px;
+}
+
+.勾选项 input {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--primary);
+}
+
+@media (max-width: 1080px) {
+    .弹窗摘要,
+    .设置勾选网格 {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 760px) {
+    .预览弹窗,
+    .设置弹窗 {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    .弹窗操作 {
+        grid-template-columns: 1fr;
+    }
+}

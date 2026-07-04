@@ -1,0 +1,176 @@
+.列表面板,
+.会话表壳,
+.会话列表,
+.主工作区 {
+    min-height: 0;
+}
+
+.主工作区 {
+    height: auto;
+}
+
+.列表面板 {
+    padding: 0;
+    overflow: visible;
+}
+
+.列表面板 > .空态 {
+    min-height: 240px;
+    border: 0;
+    border-radius: 18px;
+}
+
+.会话表壳 {
+    display: grid;
+    grid-template-rows: auto auto;
+    border: 0;
+    border-radius: 18px;
+    background: transparent;
+}
+
+.列表表头,
+.会话行 {
+    display: grid;
+    grid-template-columns: 36px minmax(0, 1fr) 104px;
+    align-items: center;
+    gap: 8px;
+}
+
+.列表表头 {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    color: var(--muted);
+    background: rgba(255, 255, 255, 0.02);
+    font-size: 11px;
+}
+
+.列表表头 span:last-child {
+    justify-self: end;
+}
+
+.行勾选头,
+.会话勾选 {
+    display: flex;
+    justify-content: center;
+}
+
+.会话勾选 input,
+.行勾选头 input {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--primary);
+}
+
+.会话列表 {
+    height: auto;
+    overflow: visible;
+}
+
+.会话行 {
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(145, 162, 186, 0.1);
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.01);
+}
+
+.会话行:hover {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.会话行.已选行 {
+    background: linear-gradient(90deg, rgba(31, 179, 157, 0.16), rgba(31, 179, 157, 0.05));
+}
+
+.会话主体 {
+    display: grid;
+    gap: 6px;
+    min-width: 0;
+}
+
+.会话状态 {
+    display: flex;
+    justify-content: flex-end;
+    align-self: start;
+}
+
+.会话元信息 {
+    gap: 8px;
+}
+
+.会话元信息项 {
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
+    max-width: 100%;
+    padding: 0 10px;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.会话元信息项.project {
+    color: #94d9ff;
+    border-color: rgba(148, 217, 255, 0.18);
+    background: rgba(148, 217, 255, 0.08);
+}
+
+.会话元信息项.time {
+    color: #f3cc7b;
+    border-color: rgba(243, 204, 123, 0.2);
+    background: rgba(243, 204, 123, 0.08);
+}
+
+.会话元信息项.size {
+    color: #6fe2cf;
+    border-color: rgba(111, 226, 207, 0.2);
+    background: rgba(111, 226, 207, 0.08);
+}
+
+.会话元信息项.source,
+.会话元信息项.thread {
+    color: #a9bcda;
+    border-color: rgba(169, 188, 218, 0.18);
+    background: rgba(169, 188, 218, 0.08);
+}
+
+.会话元信息项.provider-openai {
+    color: #7ae0a0;
+    border-color: rgba(122, 224, 160, 0.2);
+    background: rgba(122, 224, 160, 0.08);
+}
+
+.会话元信息项.provider-hi-code,
+.会话元信息项.provider-generic,
+.会话元信息项.provider-custom {
+    color: #ffc69b;
+    border-color: rgba(255, 198, 155, 0.18);
+    background: rgba(255, 198, 155, 0.08);
+}
+
+.会话元信息项.duplicate,
+.会话元信息项.duplicate-review,
+.会话元信息项.duplicate-stable {
+    color: #ffb299;
+    border-color: rgba(255, 178, 153, 0.18);
+    background: rgba(255, 178, 153, 0.08);
+}
+
+@media (max-width: 760px) {
+    .列表表头,
+    .会话行 {
+        grid-template-columns: 28px minmax(0, 1fr);
+    }
+
+    .会话状态 {
+        grid-column: 2 / 3;
+        justify-content: flex-start;
+    }
+
+    .列表表头 span:last-child {
+        display: none;
+    }
+}
