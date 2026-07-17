@@ -34,7 +34,7 @@ export function HistoryThreadTable({
                 <span>对比会话</span>
                 <span>建议</span>
             </div>
-            <div className="会话列表">
+            <div aria-label="会话列表" className="会话列表" role="region" tabIndex={0}>
                 {items.map((item) => (
                     <ThreadRow
                         allById={allById}

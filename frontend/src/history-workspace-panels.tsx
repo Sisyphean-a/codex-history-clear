@@ -4,7 +4,7 @@ import {HistoryThreadTable} from './history-workspace-thread-table';
 export function SessionPanel(props: HistoryWorkspaceController) {
     if (props.loading === 'scan' && !props.listResult) {
         return (
-            <section aria-label="正在加载会话" className="面板 列表面板" role="status">
+            <section aria-label="正在加载会话" className="面板 列表面板 加载面板" role="status">
                 <div className="列表表头 列表表头-对比">
                     <span/><span>当前会话</span><span>对比会话</span><span>建议</span>
                 </div>
