@@ -469,11 +469,11 @@ export namespace history {
 	    path: string;
 	    code: string;
 	    message: string;
-
+	
 	    static createFrom(source: any = {}) {
 	        return new ScanWarning(source);
 	    }
-
+	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.path = source["path"];
@@ -577,9 +577,9 @@ export namespace history {
 		    return a;
 		}
 	}
-
-
-
+	
+	
+	
 	export class RollbackEntry {
 	    originalPath: string;
 	    backupPath: string;
@@ -646,6 +646,10 @@ export namespace history {
 		    return a;
 		}
 	}
+	
+	
+	
+
 }
 
 export namespace main {
@@ -929,3 +933,4 @@ export namespace main {
 	}
 
 }
+

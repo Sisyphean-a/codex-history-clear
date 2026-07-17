@@ -40,7 +40,8 @@ type transcriptMetadata struct {
 }
 
 func buildSessionCatalog(paths codexPaths) (sessionCatalog, error) {
-	entries, err := readRegisteredCatalog(paths)
+	snapshots := indexShellSnapshots(paths.shellSnapshotsDir)
+	entries, err := readRegisteredCatalog(paths, snapshots)
 	if err != nil {
 		return sessionCatalog{}, err
 	}
@@ -54,7 +55,7 @@ func buildSessionCatalog(paths codexPaths) (sessionCatalog, error) {
 			continue
 		}
 		if !exists {
-			entry = newFileCloneEntry(paths, transcript)
+			entry = newFileCloneEntry(transcript, sumFileSizes(snapshots[transcript.id]))
 		}
 		entry = mergeTranscript(entry, transcript)
 		entries[transcript.id] = entry
@@ -62,7 +63,7 @@ func buildSessionCatalog(paths codexPaths) (sessionCatalog, error) {
 	return sessionCatalog{entries: entries, warnings: warnings}, nil
 }
 
-func readRegisteredCatalog(paths codexPaths) (map[string]sessionCatalogEntry, error) {
+func readRegisteredCatalog(paths codexPaths, snapshots snapshotIndex) (map[string]sessionCatalogEntry, error) {
 	index, err := readSessionIndex(paths.sessionIndex)
 	if err != nil {
 		return nil, err
@@ -84,8 +85,8 @@ func readRegisteredCatalog(paths codexPaths) (map[string]sessionCatalogEntry, er
 		if err != nil {
 			return nil, err
 		}
-		summary := mapThreadRow(paths, row, index)
-		entries[summary.ID] = newRegisteredEntry(paths, summary)
+		summary := mapThreadRow(row, index, snapshots[row.ID])
+		entries[summary.ID] = newRegisteredEntry(summary, sumFileSizes(snapshots[summary.ID]))
 	}
 	return entries, rows.Err()
 }
@@ -165,7 +166,7 @@ func readTranscriptMetadata(path string, archived bool) (transcriptMetadata, []S
 	if info != nil {
 		item.size = info.Size()
 	}
-	latest, hasTimestamp, warnings := latestTranscriptTimestamp(file, path, first)
+	latest, hasTimestamp, warnings := latestTranscriptTimestamp(scanner, path, first)
 	if !hasTimestamp {
 		if !hasWarningCode(warnings, "read-error") {
 			warnings = append(warnings, newScanWarning(path, "missing-timestamp", "没有有效的顶层时间戳"))
@@ -212,18 +213,18 @@ func transcriptFromFirstRecord(record map[string]any, path string, archived bool
 	}, true
 }
 
-func newRegisteredEntry(paths codexPaths, summary ThreadSummary) sessionCatalogEntry {
+func newRegisteredEntry(summary ThreadSummary, snapshotBytes int64) sessionCatalogEntry {
 	return sessionCatalogEntry{
 		summary:       summary,
 		registered:    true,
-		snapshotBytes: sumFileSizes(findShellSnapshots(paths.shellSnapshotsDir, summary.ID)),
+		snapshotBytes: snapshotBytes,
 		rolloutBytes:  sumFileSizes(summary.RolloutPaths),
 		hasLive:       !summary.Archived,
 		hasArchived:   summary.Archived,
 	}
 }
 
-func newFileCloneEntry(paths codexPaths, item transcriptMetadata) sessionCatalogEntry {
+func newFileCloneEntry(item transcriptMetadata, snapshotBytes int64) sessionCatalogEntry {
 	title := "克隆会话 " + shortID(item.id)
 	return sessionCatalogEntry{
 		summary: ThreadSummary{
@@ -231,7 +232,7 @@ func newFileCloneEntry(paths codexPaths, item transcriptMetadata) sessionCatalog
 			ModelProvider: item.modelProvider, CWD: item.cwd,
 			CreatedAt: item.createdAt, UpdatedAt: item.updatedAt,
 		},
-		snapshotBytes: sumFileSizes(findShellSnapshots(paths.shellSnapshotsDir, item.id)),
+		snapshotBytes: snapshotBytes,
 	}
 }
 

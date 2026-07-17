@@ -1,0 +1,21 @@
+schema_version: 1
+goal: "listing-performance"
+status: complete
+objective: "缩短大规模 Codex 会话的列表加载时间，同时保持结果与告警语义不变。"
+start_point: "3,000 个克隆会话的列表扫描耗时约 0.64 至 1.22 秒，存在重复目录扫描和重复读取记录文件。"
+acceptance:
+  - "3,000 个克隆会话仍完整列出，时间、大小和告警语义不变。"
+  - "规模扫描耗时相对起点明显缩短。"
+  - "全量 Go 测试通过。"
+non_goals:
+  - "不改变前端、公开接口或删除流程。"
+  - "不引入缓存或隐藏错误。"
+budget:
+  kind: none
+  limit: null
+current_iteration: 1
+next_action: "Goal complete."
+blocker_signature: null
+blocker_count: 0
+owner_stop: null
+updated_at: "2026-07-17"

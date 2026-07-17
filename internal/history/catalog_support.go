@@ -4,8 +4,6 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
-	"io"
-	"os"
 	"sort"
 	"strings"
 	"time"
@@ -13,14 +11,9 @@ import (
 	"github.com/google/uuid"
 )
 
-func latestTranscriptTimestamp(file *os.File, path string, first map[string]any) (time.Time, bool, []ScanWarning) {
+func latestTranscriptTimestamp(scanner *bufio.Scanner, path string, first map[string]any) (time.Time, bool, []ScanWarning) {
 	latest, found := parseRecordTimestamp(first)
 	warnings := []ScanWarning{}
-	if _, err := file.Seek(0, io.SeekStart); err != nil {
-		return latest, found, []ScanWarning{newScanWarning(path, "read-error", err.Error())}
-	}
-	scanner := bufio.NewScanner(file)
-	scanner.Buffer(make([]byte, 0, 64*1024), 4*1024*1024)
 	for scanner.Scan() {
 		recordTime, ok, parseErr := timestampFromLine(scanner.Bytes())
 		if parseErr != nil {
@@ -43,12 +36,20 @@ func timestampFromLine(line []byte) (time.Time, bool, error) {
 	if len(line) == 0 {
 		return time.Time{}, false, nil
 	}
-	var record map[string]any
+	var record map[string]json.RawMessage
 	if err := json.Unmarshal(line, &record); err != nil {
 		return time.Time{}, false, err
 	}
-	parsed, ok := parseRecordTimestamp(record)
-	return parsed, ok, nil
+	value, exists := record["timestamp"]
+	if !exists {
+		return time.Time{}, false, nil
+	}
+	var timestamp string
+	if err := json.Unmarshal(value, &timestamp); err != nil {
+		return time.Time{}, false, nil
+	}
+	parsed, err := time.Parse(time.RFC3339Nano, strings.TrimSpace(timestamp))
+	return parsed, err == nil, nil
 }
 
 func parseRecordTimestamp(record map[string]any) (time.Time, bool) {

@@ -113,7 +113,7 @@ func scanThreadRow(rows *sql.Rows) (threadRow, error) {
 	return row, err
 }
 
-func mapThreadRow(paths codexPaths, row threadRow, sessionIndex map[string]sessionIndexEntry) ThreadSummary {
+func mapThreadRow(row threadRow, sessionIndex map[string]sessionIndexEntry, snapshots []string) ThreadSummary {
 	title := row.Title
 	sourceTitle := row.Title
 	if entry, ok := sessionIndex[row.ID]; ok && entry.ThreadName != "" {
@@ -133,15 +133,15 @@ func mapThreadRow(paths codexPaths, row threadRow, sessionIndex map[string]sessi
 		UpdatedAt:        formatUnix(row.UpdatedAtMS, row.UpdatedAt),
 		CWD:              strings.TrimPrefix(row.CWD, `\\?\`),
 		Archived:         row.Archived == 1,
-		SizeBytes:        estimateThreadSize(paths, row),
+		SizeBytes:        estimateThreadSize(row.RolloutPath, snapshots),
 		FirstUserMessage: row.FirstUserMessage.String,
 		Preview:          row.Preview.String,
 	}
 }
 
-func estimateThreadSize(paths codexPaths, row threadRow) int64 {
-	size := fileSize(row.RolloutPath)
-	for _, snapshot := range findShellSnapshots(paths.shellSnapshotsDir, row.ID) {
+func estimateThreadSize(rolloutPath string, snapshots []string) int64 {
+	size := fileSize(rolloutPath)
+	for _, snapshot := range snapshots {
 		size += fileSize(snapshot)
 	}
 	return size

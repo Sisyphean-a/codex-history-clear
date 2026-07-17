@@ -5,7 +5,6 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
-	"strings"
 )
 
 func buildDeletePlan(paths codexPaths, targets []ThreadSummary, runID string) (PlanResult, error) {
@@ -38,12 +37,13 @@ func buildDeletePlan(paths codexPaths, targets []ThreadSummary, runID string) (P
 func assemblePlanTargets(paths codexPaths, targets []ThreadSummary) ([]PlanTarget, []string, error) {
 	planTargets := make([]PlanTarget, 0, len(targets))
 	warnings := []string{}
+	snapshots := indexShellSnapshots(paths.shellSnapshotsDir)
 	storeGroups, err := planStoresBatch(paths, targets)
 	if err != nil {
 		return nil, nil, err
 	}
 	for _, target := range targets {
-		rolloutStores, targetWarnings := planRolloutStores(paths, target)
+		rolloutStores, targetWarnings := planRolloutStores(target, snapshots)
 		planTarget := PlanTarget{Thread: target, Stores: append(storeGroups[target.ID], rolloutStores...), Warnings: targetWarnings}
 		planTargets = append(planTargets, planTarget)
 		warnings = append(warnings, planTarget.Warnings...)
@@ -51,7 +51,7 @@ func assemblePlanTargets(paths codexPaths, targets []ThreadSummary) ([]PlanTarge
 	return planTargets, warnings, nil
 }
 
-func planRolloutStores(paths codexPaths, target ThreadSummary) ([]PlanStore, []string) {
+func planRolloutStores(target ThreadSummary, snapshots snapshotIndex) ([]PlanStore, []string) {
 	rolloutPaths := target.RolloutPaths
 	if len(rolloutPaths) == 0 && target.RolloutPath != "" {
 		rolloutPaths = []string{target.RolloutPath}
@@ -64,7 +64,7 @@ func planRolloutStores(paths codexPaths, target ThreadSummary) ([]PlanStore, []s
 	for _, rolloutPath := range rolloutPaths {
 		stores = append(stores, planDeleteFile(rolloutPath, "rollout_jsonl"))
 	}
-	for _, snapshot := range findShellSnapshots(paths.shellSnapshotsDir, target.ID) {
+	for _, snapshot := range snapshots[target.ID] {
 		stores = append(stores, planDeleteFile(snapshot, "shell_snapshot"))
 	}
 	return stores, warnings
@@ -95,24 +95,4 @@ func planSummary(targets []PlanTarget, warnings []string) PlanSummary {
 		StoreCount:   storeCount,
 		WarningCount: len(warnings),
 	}
-}
-
-func findShellSnapshots(dir string, threadID string) []string {
-	if !fileExists(dir) {
-		return nil
-	}
-	entries, err := os.ReadDir(dir)
-	if err != nil {
-		return nil
-	}
-	snapshots := []string{}
-	for _, entry := range entries {
-		name := entry.Name()
-		if entry.IsDir() || !strings.HasPrefix(name, threadID+".") || !strings.HasSuffix(name, ".sh") {
-			continue
-		}
-		snapshots = append(snapshots, filepath.Join(dir, name))
-	}
-	sort.Strings(snapshots)
-	return snapshots
 }
