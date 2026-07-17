@@ -44,7 +44,6 @@
 .勾选项 input {
     width: 15px;
     height: 15px;
-    accent-color: var(--accent);
 }
 
 .会话行 {

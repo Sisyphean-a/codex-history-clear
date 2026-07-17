@@ -146,13 +146,21 @@
 
 .顶部筛选项 > span { color: var(--subtle); font-size: 10.5px; white-space: nowrap; }
 
-.顶部筛选项 .输入 {
+.筛选选择器 {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
     min-width: 0;
     min-height: 32px;
     padding: 0 8px;
     border: 0;
     background: transparent;
-    box-shadow: none;
+    color: var(--text);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    gap: 12px;
     outline: 0;
 }
 

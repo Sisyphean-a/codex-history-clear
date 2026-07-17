@@ -8,6 +8,7 @@ import {
     Trash,
 } from '@phosphor-icons/react';
 import type {ReactNode} from 'react';
+import {FilterSelect, ProjectFilter} from './history-workspace-filter-controls';
 import type {HistoryWorkspaceController} from './history-workspace-controller';
 
 type ToolbarIcon = 'archive' | 'folder' | 'refresh' | 'select' | 'settings' | 'trash';
@@ -75,70 +76,39 @@ function ToolbarFilters(props: HistoryWorkspaceController) {
         <div className="顶部筛选行">
             <div className="筛选标题"><Funnel aria-hidden="true" size={14}/><span>筛选</span></div>
             <ToolbarField label="归档">
-                <select
-                    aria-label="归档筛选"
-                    className="输入"
-                    onChange={(event) => props.filters.setArchivedFilter(event.target.value as typeof props.filters.archivedFilter)}
+                <FilterSelect
+                    label="归档筛选"
+                    onChange={(value) => props.filters.setArchivedFilter(value as typeof props.filters.archivedFilter)}
+                    options={archiveOptions}
                     value={props.filters.archivedFilter}
-                >
-                    <option value="all">全部会话</option>
-                    <option value="archived">仅已归档</option>
-                    <option value="active">仅未归档</option>
-                </select>
+                />
             </ToolbarField>
             <ToolbarField label="判定">
-                <select
-                    aria-label="重复判定筛选"
-                    className="输入"
-                    onChange={(event) => props.filters.setDiagnosisFilter(event.target.value as typeof props.filters.diagnosisFilter)}
+                <FilterSelect
+                    label="重复判定筛选"
+                    onChange={(value) => props.filters.setDiagnosisFilter(value as typeof props.filters.diagnosisFilter)}
+                    options={diagnosisOptions}
                     value={props.filters.diagnosisFilter}
-                >
-                    <option value="all">全部判定</option>
-                    <option value="redundant">仅多余项</option>
-                    <option value="similar">仅相似项</option>
-                    <option value="clone">仅克隆项</option>
-                    <option value="duplicate">仅重复项</option>
-                    <option value="delete">仅建议删除</option>
-                </select>
+                />
             </ToolbarField>
             <ToolbarField className="项目筛选" label="项目">
-                <input
-                    aria-label="项目目录筛选"
-                    className="输入"
-                    list="项目目录建议"
-                    onChange={(event) => props.filters.setProjectQuery(event.target.value)}
-                    placeholder="全部项目"
-                    value={props.filters.projectQuery}
-                />
-                <datalist id="项目目录建议">
-                    {props.projectChoices.map((project) => <option key={project} value={project}/>)}
-                </datalist>
+                <ProjectFilter choices={props.projectChoices} onChange={props.filters.setProjectQuery} value={props.filters.projectQuery}/>
             </ToolbarField>
             <ToolbarField label="时间">
-                <select
-                    aria-label="时间筛选"
-                    className="输入"
-                    onChange={(event) => props.filters.setAgeFilter(event.target.value as typeof props.filters.ageFilter)}
+                <FilterSelect
+                    label="时间筛选"
+                    onChange={(value) => props.filters.setAgeFilter(value as typeof props.filters.ageFilter)}
+                    options={ageOptions}
                     value={props.filters.ageFilter}
-                >
-                    <option value="any">全部时间</option>
-                    <option value="30">30 天前</option>
-                    <option value="90">90 天前</option>
-                    <option value="180">180 天前</option>
-                </select>
+                />
             </ToolbarField>
             <ToolbarField label="大小">
-                <select
-                    aria-label="大小筛选"
-                    className="输入"
-                    onChange={(event) => props.filters.setSizeFilter(event.target.value as typeof props.filters.sizeFilter)}
+                <FilterSelect
+                    label="大小筛选"
+                    onChange={(value) => props.filters.setSizeFilter(value as typeof props.filters.sizeFilter)}
+                    options={sizeOptions}
                     value={props.filters.sizeFilter}
-                >
-                    <option value="any">全部大小</option>
-                    <option value="1">1 MB 以上</option>
-                    <option value="10">10 MB 以上</option>
-                    <option value="50">50 MB 以上</option>
-                </select>
+                />
             </ToolbarField>
         </div>
     );
@@ -155,10 +125,10 @@ function ToolbarMetricItem({label, value, tone = 'neutral'}: ToolbarMetric) {
 
 function ToolbarField({label, children, className = ''}: { label: string; children: ReactNode; className?: string }) {
     return (
-        <label className={`顶部筛选项 ${className}`}>
+        <div className={`顶部筛选项 ${className}`}>
             <span>{label}</span>
             {children}
-        </label>
+        </div>
     );
 }
 
@@ -216,3 +186,32 @@ function scanStatusTone(props: HistoryWorkspaceController): MetricTone {
     if (props.scanWorkspace.kind === 'error') return 'warn';
     return 'neutral';
 }
+
+const archiveOptions = [
+    {value: 'all', label: '全部会话'},
+    {value: 'archived', label: '仅已归档'},
+    {value: 'active', label: '仅未归档'},
+] as const;
+
+const diagnosisOptions = [
+    {value: 'all', label: '全部判定'},
+    {value: 'redundant', label: '仅多余项'},
+    {value: 'similar', label: '仅相似项'},
+    {value: 'clone', label: '仅克隆项'},
+    {value: 'duplicate', label: '仅重复项'},
+    {value: 'delete', label: '仅建议删除'},
+] as const;
+
+const ageOptions = [
+    {value: 'any', label: '全部时间'},
+    {value: '30', label: '30 天前'},
+    {value: '90', label: '90 天前'},
+    {value: '180', label: '180 天前'},
+] as const;
+
+const sizeOptions = [
+    {value: 'any', label: '全部大小'},
+    {value: '1', label: '1 MB 以上'},
+    {value: '10', label: '10 MB 以上'},
+    {value: '50', label: '50 MB 以上'},
+] as const;

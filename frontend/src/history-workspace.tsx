@@ -1,4 +1,5 @@
 import './history-workspace.css';
+import './history-workspace-controls.css';
 import './history-workspace-dialogs.css';
 import './history-workspace-list.css';
 import {useHistoryWorkspaceController} from './history-workspace-controller';
