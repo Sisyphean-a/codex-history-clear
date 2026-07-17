@@ -5,10 +5,10 @@ import {
     useControllerStore,
     useDerivedWorkspaceData,
     usePlanActions,
-    useSelectionActions,
     useViewValueSetter,
     useWorkspaceActions,
 } from './history-workspace-controller-internals';
+import {useSelectionActions} from './history-workspace-selection';
 import {
     buildActionSet,
     buildFilters,
@@ -28,6 +28,7 @@ export function useHistoryWorkspaceController(): HistoryWorkspaceController {
     const selectionActions = useSelectionActions({
         setView: store.setView,
         selectedIds: derived.selectedIds,
+        visibleIds: derived.visibleThreads.map((thread) => thread.id),
         visibleSuggestedIds: derived.visibleSuggestedIds,
         strategy: store.view.strategy,
         projectChoices: derived.projectChoices,

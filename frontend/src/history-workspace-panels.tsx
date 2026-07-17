@@ -21,6 +21,7 @@ export function SessionPanel(props: HistoryWorkspaceController) {
                 duplicateAnalysis={props.duplicateAnalysis}
                 items={props.visibleThreads}
                 selectedIds={props.selectedIds}
+                toggleAllVisible={props.actions.toggleAllVisible}
                 toggleSelected={props.actions.toggleSelected}
             />
         </section>

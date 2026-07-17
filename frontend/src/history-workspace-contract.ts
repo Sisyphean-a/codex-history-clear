@@ -76,6 +76,7 @@ export type HistoryWorkspaceController = {
         changeDirectory: () => Promise<void>;
         openBackupDirectory: () => void;
         selectSuggested: () => void;
+        toggleAllVisible: () => void;
         toggleSelected: (threadID: string) => void;
         buildPlan: () => Promise<void>;
         backupPlan: () => Promise<void>;

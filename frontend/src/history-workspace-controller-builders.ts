@@ -13,6 +13,7 @@ type WorkspaceActions = {
 
 type SelectionActions = {
     selectSuggested: () => void;
+    toggleAllVisible: () => void;
     toggleSelected: (threadID: string) => void;
 };
 

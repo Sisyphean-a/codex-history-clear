@@ -217,38 +217,6 @@ export function useWorkspaceActions(args: { store: ControllerStore; resetPlanArt
     };
     return {refreshWorkspace, startScan, changeDirectory, openBackupDirectory};
 }
-export function useSelectionActions(args: {
-    setView: ControllerStore['setView'];
-    selectedIds: string[];
-    visibleSuggestedIds: string[];
-    strategy: ViewState['strategy'];
-    projectChoices: string[];
-}) {
-    const chooseStrategy = (strategy: ViewState['strategy']) => {
-        args.setView((current) => ({
-            ...current,
-            strategy,
-            manualSelectedIds: strategy === 'manual' ? args.selectedIds : current.manualSelectedIds,
-            selectedProject: strategy === 'project' && current.selectedProject === '' ? args.projectChoices[0] ?? '' : current.selectedProject,
-        }));
-    };
-    const toggleSelected = (threadID: string) => {
-        if (args.strategy !== 'manual') {
-            chooseStrategy('manual');
-            args.setView((current) => ({...current, manualSelectedIds: args.selectedIds}));
-        }
-        args.setView((current) => ({
-            ...current,
-            manualSelectedIds: current.manualSelectedIds.includes(threadID)
-                ? current.manualSelectedIds.filter((id) => id !== threadID)
-                : [...current.manualSelectedIds, threadID],
-        }));
-    };
-    const selectSuggested = () => {
-        args.setView((current) => ({...current, strategy: 'manual', manualSelectedIds: args.visibleSuggestedIds}));
-    };
-    return {chooseStrategy, selectSuggested, toggleSelected};
-}
 export function usePlanActions(args: {
     store: ControllerStore;
     selectedIds: string[];

@@ -15,21 +15,33 @@ export function HistoryThreadTable({
     items,
     duplicateAnalysis,
     selectedIds,
+    toggleAllVisible,
     toggleSelected,
 }: {
     allItems: HistoryThread[];
     items: HistoryThread[];
     duplicateAnalysis: DuplicateAnalysis;
     selectedIds: string[];
+    toggleAllVisible: () => void;
     toggleSelected: (threadID: string) => void;
 }) {
     if (items.length === 0) return <div className="空态 小号">没有匹配会话</div>;
     const selected = new Set(selectedIds);
+    const allSelected = items.every((item) => selected.has(item.id));
+    const partiallySelected = selected.size > 0 && !allSelected;
     const allById = new Map(allItems.map((item) => [item.id, item]));
     return (
         <div className="表格壳 会话表壳">
             <div className="列表表头 列表表头-对比">
-                <label className="行勾选头"><input aria-label="只读标题" checked={selected.size > 0} readOnly type="checkbox"/></label>
+                <label className="行勾选头">
+                    <input
+                        aria-label="全选当前筛选结果"
+                        checked={allSelected}
+                        onChange={toggleAllVisible}
+                        ref={(input) => { if (input) input.indeterminate = partiallySelected; }}
+                        type="checkbox"
+                    />
+                </label>
                 <span>当前会话</span>
                 <span>对比会话</span>
                 <span>建议</span>
