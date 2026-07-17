@@ -15,8 +15,8 @@ type executionPreparation struct {
 	approvedPlanPath string
 }
 
-func executeDeletePlan(paths codexPaths, request ExecuteRequest, newDiscovery func() *discovery.Service) (ExecuteResult, error) {
-	preparation, err := prepareExecution(request)
+func executeDeletePlan(paths codexPaths, request ExecuteRequest, document planDocument, newDiscovery func() *discovery.Service) (ExecuteResult, error) {
+	preparation, err := prepareExecution(paths, request, document)
 	if err != nil {
 		return ExecuteResult{}, err
 	}
@@ -46,11 +46,7 @@ func executeDeletePlan(paths codexPaths, request ExecuteRequest, newDiscovery fu
 	return writeExecutionResult(request.PlanPath, "delete", preparation, mutations, events, verification)
 }
 
-func prepareExecution(request ExecuteRequest) (executionPreparation, error) {
-	document, err := loadPlanDocument(request.PlanPath)
-	if err != nil {
-		return executionPreparation{}, err
-	}
+func prepareExecution(paths codexPaths, request ExecuteRequest, document planDocument) (executionPreparation, error) {
 	if !document.Approved {
 		return executionPreparation{}, fmt.Errorf("删除计划尚未批准，请先生成 approved-plan.json")
 	}
@@ -58,6 +54,9 @@ func prepareExecution(request ExecuteRequest) (executionPreparation, error) {
 		return executionPreparation{}, fmt.Errorf("删除计划尚未确认")
 	}
 	if err := assertInactiveTargets(document.Targets); err != nil {
+		return executionPreparation{}, err
+	}
+	if err := validatePlanDeletes(paths, document.Targets); err != nil {
 		return executionPreparation{}, err
 	}
 	return writeExecutionPreparation(request.PlanPath, document, false, request.BackupOnly || !request.SkipBackup)

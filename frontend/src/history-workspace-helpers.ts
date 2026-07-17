@@ -4,7 +4,7 @@ import {diagnosisFor, isSuggestedDeleteDiagnosis, matchesDiagnosisFilter} from '
 
 export type CleanupStrategy = 'recommended' | 'conservative' | 'project' | 'manual';
 export type ArchivedFilter = 'all' | 'archived' | 'active';
-export type AgeFilter = 'any' | '30' | '90' | '180';
+export type AgeFilter = 'any' | '14' | '30' | '90' | '180';
 export type SizeFilter = 'any' | '1' | '10' | '50';
 
 type ThreadFilters = {
@@ -33,6 +33,7 @@ const sizeThresholds: Record<SizeFilter, number> = {
     '50': 50 * megabyte,
 };
 const ageThresholds: Record<Exclude<AgeFilter, 'any'>, number> = {
+	'14': 14,
     '30': 30,
     '90': 90,
     '180': 180,
@@ -164,7 +165,7 @@ function matchesThread(thread: HistoryThread, filters: ThreadFilters, duplicateA
         && matchesArchived(thread, filters.archivedFilter)
         && matchesAge(thread, filters.ageFilter)
         && thread.sizeBytes >= sizeThresholds[filters.sizeFilter]
-        && matchesDiagnosisFilter(filters.diagnosisFilter, diagnosis);
+		&& matchesDiagnosisFilter(filters.diagnosisFilter, diagnosis, thread.isClone);
 }
 
 function matchesArchived(thread: HistoryThread, archivedFilter: ArchivedFilter) {

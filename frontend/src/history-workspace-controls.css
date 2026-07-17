@@ -19,7 +19,7 @@
 }
 
 .选择器浮层 {
-    width: var(--radix-select-trigger-width);
+    width: max(var(--radix-select-trigger-width), 150px);
     max-height: min(320px, var(--radix-select-content-available-height));
     transform-origin: var(--radix-select-content-transform-origin);
 }
@@ -42,7 +42,7 @@
     outline: 0;
 }
 
-.选择器选项 { padding: 0 32px 0 10px; }
+.选择器选项 { padding: 0 32px 0 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .选择器选项[data-highlighted],
 .项目选项:hover,
 .项目选项:focus-visible { background: #252b31; color: #fafafa; }

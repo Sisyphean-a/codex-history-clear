@@ -75,10 +75,13 @@ func verifyMetadataStores(paths codexPaths, ids map[string]struct{}) ([]Verifica
 func verifyRolloutStores(targets []PlanTarget) []VerificationFinding {
 	findings := []VerificationFinding{}
 	for _, target := range targets {
-		if target.Thread.RolloutPath != "" && fileExists(target.Thread.RolloutPath) {
+		for _, path := range rolloutPathsFromPlanTarget(target) {
+			if !fileExists(path) {
+				continue
+			}
 			findings = append(findings, VerificationFinding{
 				Store:  "rollout_jsonl",
-				Path:   target.Thread.RolloutPath,
+				Path:   path,
 				Detail: "rollout file still exists",
 			})
 		}

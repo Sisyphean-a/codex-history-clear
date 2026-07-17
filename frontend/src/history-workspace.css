@@ -119,6 +119,16 @@
 .顶部信息项-accent strong { color: var(--accent-strong); }
 .顶部信息项-warn strong { color: var(--danger-strong); }
 
+.顶部信息按钮 {
+	border: 0;
+	border-right: 1px solid var(--border);
+	border-radius: 0;
+	background: transparent;
+	cursor: pointer;
+}
+
+.顶部信息按钮:hover { background: var(--surface-hover); }
+
 .顶部筛选行 {
     width: 100%;
     max-width: 100%;

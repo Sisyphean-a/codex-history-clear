@@ -178,6 +178,30 @@ function CheckboxField({checked, label, onChange}: { checked: boolean; label: st
     return <label className="勾选项"><input checked={checked} onChange={(event) => onChange(event.target.checked)} type="checkbox"/><span>{label}</span></label>;
 }
 
+export function ScanWarningsDialog(props: DialogProps) {
+	if (!props.open) return null;
+	const warnings = props.listResult?.warnings ?? [];
+	return (
+		<div className="弹窗遮罩" onClick={props.onClose} role="presentation">
+			<section aria-labelledby="扫描告警标题" aria-modal="true" className="设置弹窗 面板" onClick={(event) => event.stopPropagation()} role="dialog">
+				<header className="弹窗头">
+					<div><h2 id="扫描告警标题">扫描告警</h2><p>这些转录没有被静默忽略，可按路径检查原始文件。</p></div>
+					<button className="图标控件" onClick={props.onClose} title="关闭" type="button"><X aria-hidden="true" size={16} weight="bold"/></button>
+				</header>
+				<div className="告警列表">
+					{warnings.map((warning) => (
+						<div className="告警项" key={`${warning.path}:${warning.code}`}>
+							<div><strong>{warning.code}</strong><span>{warning.message}</span></div>
+							<code title={warning.path}>{warning.path}</code>
+						</div>
+					))}
+				</div>
+				<footer className="弹窗底栏 设置底栏"><button className="次按钮" onClick={props.onClose} type="button">关闭</button></footer>
+			</section>
+		</div>
+	);
+}
+
 function SummaryValue({label, value, code = false}: { label: string; value: string; code?: boolean }) {
     return (
         <div className={`摘要槽 ${code ? '摘要槽-路径' : ''}`}>

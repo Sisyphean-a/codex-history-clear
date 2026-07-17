@@ -1,0 +1,90 @@
+feature: 2026-07-17-clone-session-cleanup
+created: 2026-07-17
+
+steps:
+  - action: "会话事实层：解析并合并登记会话与文件型克隆"
+    exit_signal: "未登记克隆进入列表，普通未登记转录不进入列表，同一 ID 保留全部路径，坏文件产生去重告警，可选根缺失为空集合"
+    status: done
+  - action: "删除编排层：让文件型克隆进入计划、备份、执行、验证和回滚"
+    exit_signal: "同 ID 全部路径可删除恢复，来源对象保留，路径或 ID 校验失败阻断，1000 目标不重复扫描目录和存储"
+    status: done
+  - action: "前端识别层：展示元数据克隆并把旧启发式克隆更名为相似会话"
+    exit_signal: "仅元数据克隆筛选不混入无 cloned_from 的会话，且不会自动进入建议删除集合"
+    status: done
+  - action: "日期筛选层：增加 14 天前选项"
+    exit_signal: "14 天边界行为正确，30、90、180 天和最近 30 天保护不变"
+    status: done
+  - action: "验证收尾：运行后端、Vitest、Wails 构建和浏览器验证"
+    exit_signal: "自动化检查通过，3000 文件单次遍历、1000 目标批量计划、告警展示和 Wails 绑定均有证据"
+    status: done
+
+checks:
+  - item: "只有带非空 cloned_from 的未登记转录补入历史列表"
+    source: 名词契约
+    status: done
+  - item: "登记克隆保留 SQLite 字段并补充克隆来源字段"
+    source: 合并规则
+    status: done
+  - item: "同一 ID 的 live 与 archived 转录全部进入 rolloutPaths 和删除计划"
+    source: 多路径契约
+    status: done
+  - item: "文件型克隆删除目标只使用克隆自身 ID 和路径"
+    source: 安全边界
+    status: done
+  - item: "来源会话不会因 cloned_from 被展开为删除目标"
+    source: 反向核对
+    status: done
+  - item: "元数据 ID 或路径不匹配时显式失败"
+    source: 错误语义
+    status: done
+  - item: "symlink、真实路径越界和批准后路径替换在 destructive 前阻断"
+    source: 路径安全契约
+    status: done
+  - item: "元数据克隆可筛选但不自动建议删除，启发式相似项不混入"
+    source: 前端安全边界
+    status: done
+  - item: "14 天前选项可用且既有时间策略不变"
+    source: 用户需求
+    status: done
+  - item: "坏 JSON 和无时间戳以可见告警继续扫描，无时间条目不命中日期筛选"
+    source: 错误语义
+    status: done
+  - item: "sessions 或 archived_sessions 缺失为空集合，存在但不可读时明确失败"
+    source: 根目录错误语义
+    status: done
+  - item: "扫描告警通过 ListResult 返回并在前端提供数量和详情入口"
+    source: 公开告警契约
+    status: done
+  - item: "3000 个最小转录只遍历一次、逐行流式处理且不计算内容哈希"
+    source: 性能契约
+    status: done
+  - item: "1000 个目标只构建一次目录并批量扫描每个数据库和状态文件"
+    source: 批量计划契约
+    status: done
+
+dod:
+  commands:
+    - id: CMD-001
+      command: "go test ./..."
+      core: true
+      failure_handling: fix-or-block
+    - id: CMD-002
+      command: "npm --prefix frontend test -- --run"
+      core: true
+      failure_handling: fix-or-block
+    - id: CMD-003
+      command: "npm --prefix frontend run build"
+      core: true
+      failure_handling: fix-or-block
+    - id: CMD-004
+      command: "wails build -clean"
+      core: true
+      failure_handling: fix-or-block
+    - id: CMD-005
+      command: "git diff --check"
+      core: false
+      failure_handling: fix-or-block
+  evidence_required: [command_output, integration_test, browser_check, diff_summary]
+  cleanliness:
+    debug_output: forbidden
+    todo_fixme: forbidden

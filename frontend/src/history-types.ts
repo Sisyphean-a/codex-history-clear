@@ -6,6 +6,11 @@ export type HistoryThread = {
     modelProvider: string;
     threadSource: string;
     rolloutPath: string;
+	rolloutPaths: string[];
+	isClone: boolean;
+	clonedFrom: string;
+	originalProvider: string;
+	registered: boolean;
     createdAt: string;
     updatedAt: string;
     cwd: string;
@@ -23,8 +28,9 @@ export type CleanupWorkspaceConfig = {
 
 export type HistoryListResult = {
     codexHome: string;
-    summary: { count: number; limit: number; hasMore: boolean };
+	summary: { count: number; limit: number; hasMore: boolean; warningCount: number };
     items: HistoryThread[];
+	warnings: Array<{path: string; code: string; message: string}>;
 };
 
 export type HistoryPlanStore = {

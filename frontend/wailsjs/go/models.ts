@@ -42,6 +42,11 @@ export namespace history {
 	    modelProvider: string;
 	    threadSource: string;
 	    rolloutPath: string;
+	    rolloutPaths: string[];
+	    isClone: boolean;
+	    clonedFrom: string;
+	    originalProvider: string;
+	    registered: boolean;
 	    createdAt: string;
 	    updatedAt: string;
 	    cwd: string;
@@ -63,6 +68,11 @@ export namespace history {
 	        this.modelProvider = source["modelProvider"];
 	        this.threadSource = source["threadSource"];
 	        this.rolloutPath = source["rolloutPath"];
+	        this.rolloutPaths = source["rolloutPaths"];
+	        this.isClone = source["isClone"];
+	        this.clonedFrom = source["clonedFrom"];
+	        this.originalProvider = source["originalProvider"];
+	        this.registered = source["registered"];
 	        this.createdAt = source["createdAt"];
 	        this.updatedAt = source["updatedAt"];
 	        this.cwd = source["cwd"];
@@ -455,10 +465,27 @@ export namespace history {
 	        this.all = source["all"];
 	    }
 	}
+	export class ScanWarning {
+	    path: string;
+	    code: string;
+	    message: string;
+
+	    static createFrom(source: any = {}) {
+	        return new ScanWarning(source);
+	    }
+
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.path = source["path"];
+	        this.code = source["code"];
+	        this.message = source["message"];
+	    }
+	}
 	export class ListSummary {
 	    count: number;
 	    limit: number;
 	    hasMore: boolean;
+	    warningCount: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new ListSummary(source);
@@ -469,12 +496,14 @@ export namespace history {
 	        this.count = source["count"];
 	        this.limit = source["limit"];
 	        this.hasMore = source["hasMore"];
+	        this.warningCount = source["warningCount"];
 	    }
 	}
 	export class ListResult {
 	    codexHome: string;
 	    summary: ListSummary;
 	    items: ThreadSummary[];
+	    warnings: ScanWarning[];
 	
 	    static createFrom(source: any = {}) {
 	        return new ListResult(source);
@@ -485,6 +514,7 @@ export namespace history {
 	        this.codexHome = source["codexHome"];
 	        this.summary = this.convertValues(source["summary"], ListSummary);
 	        this.items = this.convertValues(source["items"], ThreadSummary);
+	        this.warnings = this.convertValues(source["warnings"], ScanWarning);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -547,9 +577,9 @@ export namespace history {
 		    return a;
 		}
 	}
-	
-	
-	
+
+
+
 	export class RollbackEntry {
 	    originalPath: string;
 	    backupPath: string;
@@ -616,9 +646,6 @@ export namespace history {
 		    return a;
 		}
 	}
-	
-	
-
 }
 
 export namespace main {
@@ -902,4 +929,3 @@ export namespace main {
 	}
 
 }
-

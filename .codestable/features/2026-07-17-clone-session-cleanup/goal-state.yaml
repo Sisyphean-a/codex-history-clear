@@ -1,0 +1,42 @@
+feature: "2026-07-17-clone-session-cleanup"
+status: ready
+baseline_ref: "8112db4"
+stage: review
+driver_kind: native
+driver_id: "/root/clone_cleanup_goal_driver"
+handoff_reason: ""
+handoff_next: ""
+design: ".codestable/features/2026-07-17-clone-session-cleanup/clone-session-cleanup-design.md"
+checklist: ".codestable/features/2026-07-17-clone-session-cleanup/clone-session-cleanup-checklist.yaml"
+review: ".codestable/features/2026-07-17-clone-session-cleanup/clone-session-cleanup-review.md"
+qa: ".codestable/features/2026-07-17-clone-session-cleanup/clone-session-cleanup-qa.md"
+acceptance: ".codestable/features/2026-07-17-clone-session-cleanup/clone-session-cleanup-acceptance.md"
+ledger:
+  - step: 1
+    status: passed
+    red: "go test ./internal/history -run TestListThreads... -> 缺少 sessionsDir、IsClone、ClonedFrom、Registered，按预期失败"
+    green: "新增统一会话目录、元数据流式扫描、登记合并与结构化告警"
+    verify: "go test ./internal/history -count=1 -> passed；git diff --check -> passed"
+    refactor: "catalog.go 由 319 行拆分到 239 行，重跑验证通过"
+  - step: 2
+    status: passed
+    red: "多路径计划测试只得到 1 条 rollout store；批准后替换测试未被阻断"
+    green: "rolloutPaths 全量计划；计划与执行双重普通文件、根目录、真实路径、元数据 ID 校验；批量扫描数据库和状态文件"
+    verify: "多路径删除回滚、来源保留、替换与 symlink 阻断、1000 目标计划测试均 passed"
+    refactor: "删除逐目标开库和逐目标状态文件扫描，改为按 ID 分组后统一投影"
+  - step: 3
+    status: passed
+    red: "元数据克隆筛选返回空集；provider 差异仍判为 clone"
+    green: "HistoryThread 接入 isClone/clonedFrom/registered；新增仅元数据克隆筛选；启发式 clone 更名为 similar；接通告警详情入口"
+    verify: "npm --prefix frontend test -- --run -> 3 passed；npm --prefix frontend run build -> passed"
+    tdd_exception: "告警弹窗和样式为视图接线，替代证据为 TypeScript 构建与后续浏览器检查"
+  - step: 4
+    status: passed
+    red: "14 天边界测试返回空集"
+    green: "AgeFilter 与筛选选项增加 14 天阈值"
+    verify: "恰好 14 天命中、差 1ms 与无效时间不命中；Vitest passed"
+  - step: 5
+    status: passed
+    verify: "go test ./...、Vitest、frontend build、wails build -clean、git diff --check 全部通过"
+    browser: "桌面与 390px 窄屏通过；元数据克隆、14 天筛选、扫描告警详情均可见"
+    audit_fix: "元数据克隆退出启发式自动删除；转录时间逐行流式取最大值；批准计划绑定原始计划、当前 CODEX_HOME 与规范 store 集；规模测试观测真实 IO 边界"

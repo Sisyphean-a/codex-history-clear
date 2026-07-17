@@ -161,6 +161,8 @@ function rowMeta(item: HistoryThread) {
         {key: 'updatedAt', text: formatDateTime(item.updatedAt), tone: 'time'},
         {key: 'size', text: formatBytes(item.sizeBytes), tone: 'size'},
     ];
+	if (item.isClone) items.push({key: 'metadata-clone', text: `元数据克隆 · ${shortID(item.clonedFrom)}`, tone: 'diff'});
+	if (!item.registered) items.push({key: 'file-clone', text: '文件型', tone: 'source'});
     const source = sourceLabel(item);
     if (source !== '') items.push({key: 'source', text: source, tone: 'source'});
     const provider = providerLabel(item.modelProvider);

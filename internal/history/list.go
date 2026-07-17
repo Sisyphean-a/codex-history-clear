@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
+	"sort"
 	"strings"
 	"time"
 )
@@ -30,52 +31,42 @@ type threadRow struct {
 	Preview          sql.NullString
 }
 
-func listThreads(paths codexPaths, request ListRequest) ([]ThreadSummary, int, error) {
-	sessionIndex, err := readSessionIndex(paths.sessionIndex)
+func listThreads(paths codexPaths, request ListRequest) ([]ThreadSummary, int, []ScanWarning, error) {
+	catalog, err := buildSessionCatalog(paths)
 	if err != nil {
-		return nil, 0, err
+		return nil, 0, nil, err
 	}
-	db, err := openReadonlyDatabase(paths.stateDB)
-	if err != nil {
-		return nil, 0, err
-	}
-	defer db.Close()
-
-	query, args := buildThreadQuery(request)
-	rows, err := db.Query(query, args...)
-	if err != nil {
-		return nil, 0, err
-	}
-	defer rows.Close()
-
-	items := []ThreadSummary{}
-	total := 0
-	limit := effectiveLimit(request.Limit)
-	for rows.Next() {
-		row, err := scanThreadRow(rows)
-		if err != nil {
-			return nil, 0, err
-		}
-		thread := mapThreadRow(paths, row, sessionIndex)
-		if !matchesGrep(thread, request.Grep) {
-			continue
-		}
-		total++
-		if len(items) < limit {
-			items = append(items, thread)
+	items := make([]ThreadSummary, 0, len(catalog.entries))
+	for _, entry := range catalog.entries {
+		if matchesListRequest(entry.summary, request) {
+			items = append(items, entry.summary)
 		}
 	}
-	return items, total, rows.Err()
+	sort.Slice(items, func(i, j int) bool {
+		if items[i].UpdatedAt == items[j].UpdatedAt {
+			return items[i].ID > items[j].ID
+		}
+		return timestampAfter(items[i].UpdatedAt, items[j].UpdatedAt)
+	})
+	total := len(items)
+	if limit := effectiveLimit(request.Limit); len(items) > limit {
+		items = items[:limit]
+	}
+	return items, total, catalog.warnings, nil
 }
 
 func resolveTargets(paths codexPaths, threadIDs []string) ([]ThreadSummary, error) {
 	if len(threadIDs) == 0 {
 		return nil, fmt.Errorf("至少选择一个会话")
 	}
+	catalog, err := buildSessionCatalog(paths)
+	if err != nil {
+		return nil, err
+	}
 	seen := map[string]struct{}{}
 	targets := make([]ThreadSummary, 0, len(threadIDs))
 	for _, threadID := range threadIDs {
-		target, err := resolveTarget(paths, strings.TrimSpace(threadID))
+		target, err := catalog.resolve(strings.TrimSpace(threadID))
 		if err != nil {
 			return nil, err
 		}
@@ -88,76 +79,17 @@ func resolveTargets(paths codexPaths, threadIDs []string) ([]ThreadSummary, erro
 	return targets, nil
 }
 
-func resolveTarget(paths codexPaths, threadID string) (ThreadSummary, error) {
-	if threadID == "" {
-		return ThreadSummary{}, fmt.Errorf("会话 ID 不能为空")
+func matchesListRequest(thread ThreadSummary, request ListRequest) bool {
+	if !request.All && thread.Archived != request.Archived {
+		return false
 	}
-	sessionIndex, err := readSessionIndex(paths.sessionIndex)
-	if err != nil {
-		return ThreadSummary{}, err
+	if request.All && request.Archived && !thread.Archived {
+		return false
 	}
-	db, err := openReadonlyDatabase(paths.stateDB)
-	if err != nil {
-		return ThreadSummary{}, err
+	if request.CWD != "" && !strings.Contains(strings.ToLower(thread.CWD), strings.ToLower(request.CWD)) {
+		return false
 	}
-	defer db.Close()
-
-	rows, err := db.Query(
-		`select id, title, source, model_provider, thread_source, rollout_path, created_at, updated_at, created_at_ms, updated_at_ms, cwd, archived, first_user_message, preview
-		from threads
-		where id like ?
-		order by coalesce(updated_at_ms, updated_at * 1000) desc, id desc`,
-		threadID+"%",
-	)
-	if err != nil {
-		return ThreadSummary{}, err
-	}
-	defer rows.Close()
-
-	matches := []ThreadSummary{}
-	for rows.Next() {
-		row, err := scanThreadRow(rows)
-		if err != nil {
-			return ThreadSummary{}, err
-		}
-		matches = append(matches, mapThreadRow(paths, row, sessionIndex))
-	}
-	if err := rows.Err(); err != nil {
-		return ThreadSummary{}, err
-	}
-	if len(matches) == 0 {
-		return ThreadSummary{}, fmt.Errorf("未找到会话: %s", threadID)
-	}
-	if len(matches) > 1 {
-		return ThreadSummary{}, fmt.Errorf("短 ID 命中 %d 条会话，请输入更长的前缀: %s", len(matches), threadID)
-	}
-	return matches[0], nil
-}
-
-func buildThreadQuery(request ListRequest) (string, []any) {
-	where := []string{}
-	args := []any{}
-	if !request.All {
-		where = append(where, "archived = ?")
-		if request.Archived {
-			args = append(args, 1)
-		} else {
-			args = append(args, 0)
-		}
-	} else if request.Archived {
-		where = append(where, "archived = ?")
-		args = append(args, 1)
-	}
-	if request.CWD != "" {
-		where = append(where, `lower(cwd) like lower(?) escape '\'`)
-		args = append(args, "%"+escapeLike(request.CWD)+"%")
-	}
-	query := `select id, title, source, model_provider, thread_source, rollout_path, created_at, updated_at, created_at_ms, updated_at_ms, cwd, archived, first_user_message, preview from threads`
-	if len(where) > 0 {
-		query += " where " + strings.Join(where, " and ")
-	}
-	query += " order by coalesce(updated_at_ms, updated_at * 1000) desc, id desc"
-	return query, args
+	return matchesGrep(thread, request.Grep)
 }
 
 func scanThreadRow(rows *sql.Rows) (threadRow, error) {
@@ -195,6 +127,8 @@ func mapThreadRow(paths codexPaths, row threadRow, sessionIndex map[string]sessi
 		ModelProvider:    row.ModelProvider,
 		ThreadSource:     nullableString(row.ThreadSource),
 		RolloutPath:      row.RolloutPath,
+		RolloutPaths:     nonEmptyStrings(row.RolloutPath),
+		Registered:       true,
 		CreatedAt:        formatUnix(row.CreatedAtMS, row.CreatedAt),
 		UpdatedAt:        formatUnix(row.UpdatedAtMS, row.UpdatedAt),
 		CWD:              strings.TrimPrefix(row.CWD, `\\?\`),

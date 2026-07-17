@@ -1,8 +1,8 @@
 import type {HistoryThread} from './history-types';
 
-export type DuplicateKind = 'none' | 'duplicate' | 'similar' | 'clone';
+export type DuplicateKind = 'none' | 'duplicate' | 'similar';
 export type DuplicateDisposition = 'none' | 'keep' | 'delete';
-export type DiagnosisFilter = 'all' | 'redundant' | 'duplicate' | 'similar' | 'clone' | 'delete';
+export type DiagnosisFilter = 'all' | 'redundant' | 'duplicate' | 'similar' | 'metadata-clone' | 'delete';
 
 export type ThreadDuplicateDiagnosis = {
     kind: DuplicateKind;
@@ -19,7 +19,6 @@ export type DuplicateAnalysis = {
         groupCount: number;
         redundantCount: number;
         similarCount: number;
-        cloneCount: number;
         duplicateCount: number;
     };
 };
@@ -40,7 +39,7 @@ const emptyDiagnosis: ThreadDuplicateDiagnosis = {
 
 export function analyzeThreadDuplicates(threads: HistoryThread[]): DuplicateAnalysis {
     const byId = new Map<string, ThreadDuplicateDiagnosis>();
-    const summary = {groupCount: 0, redundantCount: 0, similarCount: 0, cloneCount: 0, duplicateCount: 0};
+	const summary = {groupCount: 0, redundantCount: 0, similarCount: 0, duplicateCount: 0};
     for (const thread of threads) byId.set(thread.id, emptyDiagnosis);
     for (const group of groupedByFirstMessage(threads)) {
         const diagnosis = buildGroupDiagnosis(group);
@@ -58,8 +57,9 @@ export function isSuggestedDeleteDiagnosis(diagnosis: ThreadDuplicateDiagnosis) 
     return diagnosis.disposition === 'delete';
 }
 
-export function matchesDiagnosisFilter(filter: DiagnosisFilter, diagnosis: ThreadDuplicateDiagnosis) {
+export function matchesDiagnosisFilter(filter: DiagnosisFilter, diagnosis: ThreadDuplicateDiagnosis, isMetadataClone = false) {
     if (filter === 'all') return true;
+	if (filter === 'metadata-clone') return isMetadataClone;
     if (filter === 'redundant') return diagnosis.kind !== 'none';
     if (filter === 'delete') return diagnosis.disposition === 'delete';
     return diagnosis.kind === filter;
@@ -67,7 +67,6 @@ export function matchesDiagnosisFilter(filter: DiagnosisFilter, diagnosis: Threa
 
 export function duplicateKindLabel(kind: DuplicateKind) {
     if (kind === 'similar') return '相似项';
-    if (kind === 'clone') return '克隆项';
     if (kind === 'duplicate') return '重复项';
     return '普通项';
 }
@@ -75,6 +74,7 @@ export function duplicateKindLabel(kind: DuplicateKind) {
 function groupedByFirstMessage(threads: HistoryThread[]) {
     const groups = new Map<string, HistoryThread[]>();
     for (const thread of threads) {
+        if (thread.isClone) continue;
         const key = normalizeText(thread.firstUserMessage);
         if (key === '') continue;
         groups.set(key, [...(groups.get(key) ?? []), thread]);
@@ -129,7 +129,6 @@ function highestPriority(items: GroupDiagnosis['redundant'][number][]) {
 
 function incrementKind(summary: DuplicateAnalysis['summary'], kind: Exclude<DuplicateKind, 'none'>) {
     if (kind === 'similar') summary.similarCount += 1;
-    if (kind === 'clone') summary.cloneCount += 1;
     if (kind === 'duplicate') summary.duplicateCount += 1;
 }
 
@@ -153,7 +152,7 @@ function classifyThread(thread: HistoryThread, keeper: HistoryThread) {
         return {thread, kind: 'none' as const, reason: ''};
     }
     if (hasClonedIdentity(thread, keeper)) {
-        return {thread, kind: 'clone' as const, reason: '首条消息和摘要一致，但来源对象不同，判定为克隆项'};
+		return {thread, kind: 'similar' as const, reason: '首条消息和摘要一致，但来源对象不同，判定为相似项'};
     }
     return {thread, kind: 'duplicate' as const, reason: '首条消息和摘要一致，判定为重复项，建议删除较旧记录'};
 }
@@ -174,13 +173,11 @@ function hasClonedIdentity(left: HistoryThread, right: HistoryThread) {
 
 function keepReason(kind: Exclude<DuplicateKind, 'none'>) {
     if (kind === 'similar') return '首条消息一致，保留体积更大的这条';
-    if (kind === 'clone') return '内容一致但来源对象不同，保留较新的这条';
     return '内容一致，保留较新的这条';
 }
 
 function priorityFor(kind: Exclude<DuplicateKind, 'none'>) {
     if (kind === 'similar') return 3;
-    if (kind === 'clone') return 2;
     return 1;
 }
 

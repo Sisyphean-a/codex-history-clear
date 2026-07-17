@@ -2,12 +2,13 @@ import {useEffect, useState} from 'react';
 import type {HistoryWorkspaceController} from './history-workspace-controller';
 import {SessionPanel} from './history-workspace-panels';
 import {ToolbarPanel} from './history-workspace-toolbar';
-import {DeletePreviewDialog, SettingsDialog} from './history-workspace-ui';
+import {DeletePreviewDialog, ScanWarningsDialog, SettingsDialog} from './history-workspace-ui';
 
 export function HistoryWorkspaceView(props: HistoryWorkspaceController) {
     const [previewOpen, setPreviewOpen] = useState(false);
     const [previewPending, setPreviewPending] = useState(false);
-    const [settingsOpen, setSettingsOpen] = useState(false);
+	const [settingsOpen, setSettingsOpen] = useState(false);
+	const [warningsOpen, setWarningsOpen] = useState(false);
 
     useEffect(() => {
         if (!previewPending || props.loading === 'plan') return;
@@ -42,9 +43,10 @@ export function HistoryWorkspaceView(props: HistoryWorkspaceController) {
         <article className="工具壳">
             <section className="顶部区">
                 <ToolbarPanel
-                    {...props}
-                    onOpenPreview={openPreview}
-                    onOpenSettings={() => setSettingsOpen(true)}
+					{...props}
+					onOpenPreview={openPreview}
+					onOpenSettings={() => setSettingsOpen(true)}
+					onOpenWarnings={() => setWarningsOpen(true)}
                 />
                 {props.error ? <div className="错误横幅">{props.error}</div> : null}
             </section>
@@ -54,7 +56,8 @@ export function HistoryWorkspaceView(props: HistoryWorkspaceController) {
                 </section>
             </section>
             <DeletePreviewDialog {...props} onClose={closePreview} open={previewOpen}/>
-            <SettingsDialog {...props} onClose={() => setSettingsOpen(false)} open={settingsOpen}/>
+			<SettingsDialog {...props} onClose={() => setSettingsOpen(false)} open={settingsOpen}/>
+			<ScanWarningsDialog {...props} onClose={() => setWarningsOpen(false)} open={warningsOpen}/>
         </article>
     );
 }

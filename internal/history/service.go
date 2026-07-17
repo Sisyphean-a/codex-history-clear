@@ -14,6 +14,7 @@ type Service struct {
 	userHomeDir       func() (string, error)
 	newDiscovery      func() *discovery.Service
 	codexHomeOverride string
+	scanMetrics       *historyScanMetrics
 }
 
 func NewService() *Service {
@@ -41,7 +42,7 @@ func (s *Service) ListThreads(request ListRequest) (ListResult, error) {
 	if err := validateDataModel(paths); err != nil {
 		return ListResult{}, err
 	}
-	threads, total, err := listThreads(paths, request)
+	threads, total, warnings, err := listThreads(paths, request)
 	if err != nil {
 		return ListResult{}, err
 	}
@@ -49,11 +50,13 @@ func (s *Service) ListThreads(request ListRequest) (ListResult, error) {
 	return ListResult{
 		CodexHome: paths.codexHome,
 		Summary: ListSummary{
-			Count:   len(threads),
-			Limit:   limit,
-			HasMore: total > len(threads),
+			Count:        len(threads),
+			Limit:        limit,
+			HasMore:      total > len(threads),
+			WarningCount: len(warnings),
 		},
-		Items: threads,
+		Items:    threads,
+		Warnings: warnings,
 	}, nil
 }
 
@@ -76,6 +79,9 @@ func (s *Service) BuildDeletePlan(request BuildPlanRequest) (PlanResult, error) 
 	if err != nil {
 		return PlanResult{}, err
 	}
+	if err := validateTargetTranscripts(paths, targets); err != nil {
+		return PlanResult{}, err
+	}
 	runID := buildRunID(s.now().UTC())
 	return buildDeletePlan(paths, targets, runID)
 }
@@ -95,7 +101,17 @@ func (s *Service) ExecuteDeletePlan(request ExecuteRequest) (ExecuteResult, erro
 	if err := validateDataModel(paths); err != nil {
 		return ExecuteResult{}, err
 	}
-	return executeDeletePlan(paths, request, s.newDiscovery)
+	document, err := loadPlanDocument(request.PlanPath)
+	if err != nil {
+		return ExecuteResult{}, err
+	}
+	if err := validateApprovedPlan(paths, request.PlanPath, document); err != nil {
+		return ExecuteResult{}, err
+	}
+	if err := validatePlanDeletes(paths, document.Targets); err != nil {
+		return ExecuteResult{}, err
+	}
+	return executeDeletePlan(paths, request, document, s.newDiscovery)
 }
 
 func (s *Service) RollbackExecution(request RollbackRequest) (RollbackResult, error) {

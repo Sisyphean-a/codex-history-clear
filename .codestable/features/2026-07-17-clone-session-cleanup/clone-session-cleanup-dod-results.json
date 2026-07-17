@@ -1,0 +1,9 @@
+{
+  "status": "passed",
+  "design_approved": true,
+  "steps_done": 5,
+  "checks_done": 14,
+  "review_required": true,
+  "qa_required": true,
+  "acceptance_required": true
+}

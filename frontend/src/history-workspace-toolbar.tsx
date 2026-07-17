@@ -18,12 +18,14 @@ type MetricTone = 'accent' | 'warn' | 'neutral';
 type ToolbarPanelProps = HistoryWorkspaceController & {
     onOpenPreview: () => void;
     onOpenSettings: () => void;
+	onOpenWarnings: () => void;
 };
 
 type ToolbarMetric = {
     label: string;
     value: string;
     tone?: MetricTone;
+	onClick?: () => void;
 };
 
 export function ToolbarPanel(props: ToolbarPanelProps) {
@@ -114,7 +116,14 @@ function ToolbarFilters(props: HistoryWorkspaceController) {
     );
 }
 
-function ToolbarMetricItem({label, value, tone = 'neutral'}: ToolbarMetric) {
+function ToolbarMetricItem({label, value, tone = 'neutral', onClick}: ToolbarMetric & {onClick?: () => void}) {
+	if (onClick) {
+		return (
+			<button className={`顶部信息项 顶部信息按钮 顶部信息项-${tone}`} onClick={onClick} type="button">
+				<span>{label}</span><strong title={value}>{value}</strong>
+			</button>
+		);
+	}
     return (
         <div className={`顶部信息项 顶部信息项-${tone}`}>
             <span>{label}</span>
@@ -168,14 +177,15 @@ function ToolbarGlyph({icon}: { icon: ToolbarIcon }) {
     return <Trash aria-hidden="true" size={15}/>;
 }
 
-function toolbarMetrics(props: HistoryWorkspaceController): ToolbarMetric[] {
+function toolbarMetrics(props: ToolbarPanelProps): ToolbarMetric[] {
     const unknownCount = props.scanWorkspace.kind === 'ready' ? props.scanWorkspace.scan.summary.unknownCount : 0;
     return [
         {label: '会话', value: String(props.overview.totalSessions)},
         {label: '归档', value: String(props.overview.archivedSessions)},
         {label: '重复组', value: String(props.duplicateAnalysis.summary.groupCount)},
         {label: '待确认', value: String(props.overview.suggestedCount), tone: props.overview.suggestedCount > 0 ? 'warn' : 'neutral'},
-        {label: '未识别', value: String(unknownCount), tone: unknownCount > 0 ? 'warn' : 'neutral'},
+		{label: '未识别', value: String(unknownCount), tone: unknownCount > 0 ? 'warn' : 'neutral'},
+		{label: '扫描告警', value: String(props.listResult?.summary.warningCount ?? 0), tone: (props.listResult?.summary.warningCount ?? 0) > 0 ? 'warn' : 'neutral', onClick: (props.listResult?.summary.warningCount ?? 0) > 0 ? props.onOpenWarnings : undefined},
         {label: '已选择', value: String(props.selectedIds.length), tone: props.selectedIds.length > 0 ? 'accent' : 'neutral'},
         {label: '预计释放', value: props.overview.releaseText, tone: props.selectedIds.length > 0 ? 'accent' : 'neutral'},
     ];
@@ -197,13 +207,14 @@ const diagnosisOptions = [
     {value: 'all', label: '全部判定'},
     {value: 'redundant', label: '仅多余项'},
     {value: 'similar', label: '仅相似项'},
-    {value: 'clone', label: '仅克隆项'},
+	{value: 'metadata-clone', label: '仅元数据克隆'},
     {value: 'duplicate', label: '仅重复项'},
     {value: 'delete', label: '仅建议删除'},
 ] as const;
 
 const ageOptions = [
     {value: 'any', label: '全部时间'},
+	{value: '14', label: '14 天前'},
     {value: '30', label: '30 天前'},
     {value: '90', label: '90 天前'},
     {value: '180', label: '180 天前'},

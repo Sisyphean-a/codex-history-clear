@@ -9,32 +9,45 @@ type ListRequest struct {
 }
 
 type ThreadSummary struct {
-	ID               string `json:"id"`
-	Title            string `json:"title"`
-	SourceTitle      string `json:"sourceTitle"`
-	Source           string `json:"source"`
-	ModelProvider    string `json:"modelProvider"`
-	ThreadSource     string `json:"threadSource"`
-	RolloutPath      string `json:"rolloutPath"`
-	CreatedAt        string `json:"createdAt"`
-	UpdatedAt        string `json:"updatedAt"`
-	CWD              string `json:"cwd"`
-	Archived         bool   `json:"archived"`
-	SizeBytes        int64  `json:"sizeBytes"`
-	FirstUserMessage string `json:"firstUserMessage"`
-	Preview          string `json:"preview"`
+	ID               string   `json:"id"`
+	Title            string   `json:"title"`
+	SourceTitle      string   `json:"sourceTitle"`
+	Source           string   `json:"source"`
+	ModelProvider    string   `json:"modelProvider"`
+	ThreadSource     string   `json:"threadSource"`
+	RolloutPath      string   `json:"rolloutPath"`
+	RolloutPaths     []string `json:"rolloutPaths"`
+	IsClone          bool     `json:"isClone"`
+	ClonedFrom       string   `json:"clonedFrom"`
+	OriginalProvider string   `json:"originalProvider"`
+	Registered       bool     `json:"registered"`
+	CreatedAt        string   `json:"createdAt"`
+	UpdatedAt        string   `json:"updatedAt"`
+	CWD              string   `json:"cwd"`
+	Archived         bool     `json:"archived"`
+	SizeBytes        int64    `json:"sizeBytes"`
+	FirstUserMessage string   `json:"firstUserMessage"`
+	Preview          string   `json:"preview"`
 }
 
 type ListSummary struct {
-	Count   int  `json:"count"`
-	Limit   int  `json:"limit"`
-	HasMore bool `json:"hasMore"`
+	Count        int  `json:"count"`
+	Limit        int  `json:"limit"`
+	HasMore      bool `json:"hasMore"`
+	WarningCount int  `json:"warningCount"`
+}
+
+type ScanWarning struct {
+	Path    string `json:"path"`
+	Code    string `json:"code"`
+	Message string `json:"message"`
 }
 
 type ListResult struct {
 	CodexHome string          `json:"codexHome"`
 	Summary   ListSummary     `json:"summary"`
 	Items     []ThreadSummary `json:"items"`
+	Warnings  []ScanWarning   `json:"warnings"`
 }
 
 type BuildPlanRequest struct {

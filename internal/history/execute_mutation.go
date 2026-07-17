@@ -37,7 +37,7 @@ func performExecution(paths codexPaths, targets []PlanTarget, events *[]JobEvent
 	}
 	results = append(results, jsonResults...)
 
-	fileResults, err := executeFileDeletes(targets)
+	fileResults, err := executeFileDeletes(paths, targets)
 	if err != nil {
 		return nil, err
 	}
@@ -142,12 +142,15 @@ func executeFileRewrites(paths codexPaths, ids map[string]struct{}) ([]MutationR
 	return results, nil
 }
 
-func executeFileDeletes(targets []PlanTarget) ([]MutationResult, error) {
+func executeFileDeletes(paths codexPaths, targets []PlanTarget) ([]MutationResult, error) {
 	results := []MutationResult{}
 	for _, target := range targets {
 		for _, store := range target.Stores {
 			if store.Action != "delete_file" || !store.Exists || store.Path == "" {
 				continue
+			}
+			if err := validateDeleteStore(paths, target.Thread, store); err != nil {
+				return nil, err
 			}
 			if err := os.Remove(store.Path); err != nil && !os.IsNotExist(err) {
 				return nil, err
