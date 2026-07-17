@@ -178,7 +178,7 @@ function actionBadge(diagnosis: ThreadDuplicateDiagnosis) {
 }
 
 function threadPreview(item: HistoryThread) {
-    return item.preview.trim() || item.firstUserMessage.trim() || item.sourceTitle.trim() || '—';
+    return item.preview.trim() || item.firstUserMessage.trim() || item.sourceTitle.trim() || '无预览';
 }
 
 function sourceLabel(item: HistoryThread) {

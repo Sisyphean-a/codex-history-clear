@@ -1,219 +1,143 @@
 .列表面板,
 .会话表壳,
 .会话列表,
-.主工作区 {
-    min-height: 0;
-}
+.主工作区 { min-height: 0; }
 
-.主工作区 {
-    height: auto;
-}
-
-.列表面板 {
-    padding: 0;
-    overflow: visible;
-}
-
-.列表面板 > .空态 {
-    min-height: 240px;
-    border: 0;
-    border-radius: 18px;
-}
+.列表面板 { overflow: hidden; padding: 0; }
+.列表面板 > .空态 { min-height: 260px; border: 0; }
 
 .会话表壳 {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
     display: grid;
     grid-template-rows: auto auto;
     border: 0;
-    border-radius: 18px;
-    background: transparent;
+    border-radius: 8px;
 }
 
 .列表表头,
 .会话行 {
     display: grid;
-    grid-template-columns: 36px minmax(0, 1.1fr) minmax(0, 1.1fr) 220px;
+    grid-template-columns: 34px minmax(0, 1fr) minmax(0, 1fr) 176px;
     align-items: center;
-    gap: 12px;
-}
-
-.列表表头 {
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--border);
-    color: var(--muted);
-    background: rgba(255, 255, 255, 0.02);
-    font-size: 11px;
-}
-
-.行勾选头,
-.会话勾选 {
-    display: flex;
-    justify-content: center;
-}
-
-.会话勾选 input,
-.行勾选头 input {
-    width: 16px;
-    height: 16px;
-    accent-color: var(--primary);
-}
-
-.会话列表 {
-    height: auto;
-    overflow: visible;
-}
-
-.会话行 {
-    padding: 14px 16px;
-    border-bottom: 1px solid rgba(145, 162, 186, 0.1);
-    cursor: pointer;
-    background: rgba(255, 255, 255, 0.01);
-}
-
-.会话行:hover {
-    background: rgba(255, 255, 255, 0.04);
-}
-
-.会话行.已选行 {
-    background: linear-gradient(90deg, rgba(31, 179, 157, 0.16), rgba(31, 179, 157, 0.05));
-}
-
-.会话主体 {
-    display: grid;
-    gap: 6px;
+    gap: 14px;
+    width: 100%;
     min-width: 0;
 }
 
-.会话状态 {
-    display: grid;
-    gap: 8px;
-    align-self: stretch;
-}
-
-.会话元信息 {
-    gap: 8px;
-}
-
-.会话元信息项 {
-    display: inline-flex;
-    align-items: center;
-    min-height: 24px;
-    max-width: 100%;
-    padding: 0 10px;
-    border: 1px solid transparent;
-    border-radius: 999px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    font-size: 11px;
+.列表表头 {
+    min-height: 38px;
+    padding: 0 14px;
+    border-bottom: 1px solid var(--border);
+    background: #171a1e;
+    color: var(--subtle);
+    font-size: 10.5px;
     font-weight: 600;
 }
 
-.会话元信息项.project {
-    color: #94d9ff;
-    border-color: rgba(148, 217, 255, 0.18);
-    background: rgba(148, 217, 255, 0.08);
+.行勾选头,
+.会话勾选 { display: flex; justify-content: center; }
+
+.会话勾选 input,
+.行勾选头 input,
+.勾选项 input {
+    width: 15px;
+    height: 15px;
+    accent-color: var(--accent);
 }
 
-.会话元信息项.time {
-    color: #f3cc7b;
-    border-color: rgba(243, 204, 123, 0.2);
-    background: rgba(243, 204, 123, 0.08);
+.会话行 {
+    min-height: 116px;
+    padding: 13px 14px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    cursor: pointer;
+    transition: background-color 120ms ease, box-shadow 120ms ease;
 }
 
-.会话元信息项.size {
-    color: #6fe2cf;
-    border-color: rgba(111, 226, 207, 0.2);
-    background: rgba(111, 226, 207, 0.08);
+.会话行:last-child { border-bottom: 0; }
+.会话行:hover { background: var(--surface-hover); }
+.会话行.已选行 { background: #172320; box-shadow: inset 3px 0 0 var(--accent); }
+
+.会话主体 { display: grid; min-width: 0; gap: 6px; }
+.会话状态 { display: grid; align-self: stretch; align-content: center; justify-items: start; gap: 7px; }
+.会话元信息 { min-width: 0; flex-wrap: wrap; gap: 0; }
+
+.会话元信息项 {
+    display: inline-block;
+    max-width: 190px;
+    overflow: hidden;
+    padding: 0 7px;
+    border-right: 1px solid var(--border-strong);
+    color: var(--subtle);
+    font-size: 10.5px;
+    line-height: 1.25;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
-.会话元信息项.source,
-.会话元信息项.thread {
-    color: #a9bcda;
-    border-color: rgba(169, 188, 218, 0.18);
-    background: rgba(169, 188, 218, 0.08);
-}
-
-.会话元信息项.provider-openai {
-    color: #7ae0a0;
-    border-color: rgba(122, 224, 160, 0.2);
-    background: rgba(122, 224, 160, 0.08);
-}
-
-.会话元信息项.provider-hi-code,
-.会话元信息项.provider-generic,
-.会话元信息项.provider-custom {
-    color: #ffc69b;
-    border-color: rgba(255, 198, 155, 0.18);
-    background: rgba(255, 198, 155, 0.08);
-}
-
-.会话元信息项.duplicate,
-.会话元信息项.duplicate-review,
-.会话元信息项.duplicate-stable {
-    color: #ffb299;
-    border-color: rgba(255, 178, 153, 0.18);
-    background: rgba(255, 178, 153, 0.08);
-}
-
-.会话元信息项.diff {
-    color: #d6b2ff;
-    border-color: rgba(214, 178, 255, 0.18);
-    background: rgba(214, 178, 255, 0.08);
-}
+.会话元信息项:first-child { padding-left: 0; }
+.会话元信息项:last-child { border-right: 0; }
+.会话元信息项.diff { color: var(--accent-strong); }
 
 .对比主体 {
-    padding: 12px 14px;
-    border: 1px solid rgba(148, 163, 184, 0.14);
-    border-radius: 14px;
-    background: rgba(15, 23, 42, 0.26);
+    min-height: 86px;
+    padding: 10px 12px;
+    border-left: 2px solid var(--border-strong);
+    background: rgba(255, 255, 255, 0.018);
 }
 
 .对比空态 {
-    min-height: 96px;
-    padding: 12px 14px;
-    border: 1px dashed rgba(148, 163, 184, 0.16);
-    border-radius: 14px;
-    color: var(--muted);
     display: grid;
+    min-height: 86px;
     align-content: center;
+    padding: 10px 12px;
+    border-left: 2px solid var(--border);
+    color: var(--subtle);
 }
 
-.对比差异 {
-    padding-top: 2px;
+.对比差异 { padding-top: 2px; }
+.建议列 { justify-items: start; }
+.判定说明 { color: var(--muted); font-size: 11px; line-height: 1.45; }
+.判定补充 { color: var(--subtle); font-size: 10.5px; }
+
+.骨架列表 { display: grid; }
+
+.骨架行 {
+    display: grid;
+    grid-template-columns: 34px 1fr 1fr;
+    gap: 14px;
+    min-height: 116px;
+    align-items: center;
+    padding: 13px 14px;
+    border-bottom: 1px solid var(--border);
 }
 
-.建议列 {
-    justify-items: start;
+.骨架行 i {
+    display: block;
+    height: 58px;
+    border-radius: 6px;
+    background: var(--surface-raised);
 }
 
-.判定说明,
-.判定补充 {
-    color: var(--muted);
-    font-size: 12px;
-    line-height: 1.45;
+.骨架行 i:first-child { width: 15px; height: 15px; }
+
+@media (prefers-reduced-motion: no-preference) {
+    .骨架行 i { animation: 骨架呼吸 1.4s ease-in-out infinite alternate; }
+    .骨架行:nth-child(2n) i { animation-delay: 160ms; }
 }
 
-.判定补充 {
-    font-size: 11px;
-}
+@keyframes 骨架呼吸 { from { opacity: 0.42; } to { opacity: 0.9; } }
 
-@media (max-width: 760px) {
+@media (max-width: 900px) {
     .列表表头,
-    .会话行 {
-        grid-template-columns: 28px minmax(0, 1fr);
-    }
-
+    .会话行 { grid-template-columns: 28px minmax(0, 1fr); }
     .列表表头 span:nth-child(3),
-    .列表表头 span:nth-child(4) {
-        display: none;
-    }
-
+    .列表表头 span:nth-child(4) { display: none; }
     .会话行 > :nth-child(3),
-    .会话行 > :nth-child(4) {
-        grid-column: 2 / 3;
-    }
-
-    .会话状态 {
-        padding-top: 6px;
-    }
+    .会话行 > :nth-child(4) { grid-column: 2 / 3; }
+    .会话状态 { padding-top: 4px; }
+    .骨架行 { grid-template-columns: 28px 1fr; }
+    .骨架行 i:last-child { display: none; }
 }

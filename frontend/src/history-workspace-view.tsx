@@ -1,7 +1,8 @@
 import {useEffect, useState} from 'react';
 import type {HistoryWorkspaceController} from './history-workspace-controller';
 import {SessionPanel} from './history-workspace-panels';
-import {DeletePreviewDialog, SettingsDialog, ToolbarPanel} from './history-workspace-ui';
+import {ToolbarPanel} from './history-workspace-toolbar';
+import {DeletePreviewDialog, SettingsDialog} from './history-workspace-ui';
 
 export function HistoryWorkspaceView(props: HistoryWorkspaceController) {
     const [previewOpen, setPreviewOpen] = useState(false);

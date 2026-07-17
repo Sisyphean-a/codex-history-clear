@@ -1,6 +1,6 @@
 import type {DeletePlanItem, DeletePlanResult, DuplicateGroup, GroupCandidate, ScanResult, WorkspaceState} from "./workspace-types";
 
-const emptyDash = '—';
+const emptyDash = '无记录';
 
 const actionLabels: Record<string, string> = {
     keep: '保留',

@@ -1,37 +1,16 @@
-@font-face {
-    font-family: "Nunito Local";
-    src: url("./assets/fonts/nunito-v16-latin-regular.woff2") format("woff2");
-    font-display: swap;
-}
-
 :root {
-    color: #0f172a;
-    background: #f8fafc;
-    font-family: "Nunito Local", "Fira Sans", "Segoe UI", sans-serif;
+    color: #edf0f2;
+    background: #101214;
+    font-family: "Segoe UI Variable Text", "PingFang SC", "Microsoft YaHei UI", sans-serif;
     font-synthesis: none;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
 
-* {
-    box-sizing: border-box;
-}
-
-html,
-body,
-#root {
-    margin: 0;
-    min-height: 100%;
-}
-
-body {
-    min-height: 100vh;
-    margin: 0;
-}
-
-button,
-input,
-textarea {
-    font: inherit;
-}
+* { box-sizing: border-box; }
+html, body, #root { min-height: 100%; margin: 0; }
+body { min-height: 100dvh; margin: 0; }
+button, input, textarea, select { font: inherit; }
+button, label, select { -webkit-user-select: none; user-select: none; }
+code { font-family: "Cascadia Code", Consolas, monospace; }

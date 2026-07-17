@@ -53,7 +53,7 @@ export function formatBytes(bytes: number) {
 
 export function formatDateTime(value: string) {
     const date = new Date(value);
-    if (Number.isNaN(date.valueOf())) return value || '—';
+    if (Number.isNaN(date.valueOf())) return value || '无记录';
     return new Intl.DateTimeFormat('zh-CN', {
         month: '2-digit',
         day: '2-digit',
@@ -103,13 +103,13 @@ export function totalSelectedBytes(threads: HistoryThread[], selectedIds: string
 }
 
 export function latestUpdatedAt(threads: HistoryThread[]) {
-    if (threads.length === 0) return '—';
+    if (threads.length === 0) return '无记录';
     const latest = threads.reduce((current, thread) => {
         const nextTime = Date.parse(thread.updatedAt);
         if (Number.isNaN(nextTime)) return current;
         return nextTime > current ? nextTime : current;
     }, 0);
-    return latest === 0 ? '—' : formatDateTime(new Date(latest).toISOString());
+    return latest === 0 ? '无记录' : formatDateTime(new Date(latest).toISOString());
 }
 
 export function buildThreadTags(thread: HistoryThread, selectedIds: string[]) {

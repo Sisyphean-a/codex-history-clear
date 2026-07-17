@@ -29,9 +29,9 @@ export function HistoryPlanTargetTable({targets}: { targets: HistoryPlanResult['
                             <div className="候选主值" title={target.thread.title || '未命名会话'}>{target.thread.title || '未命名会话'}</div>
                             <div className="候选副值">{shortID(target.thread.id)}</div>
                         </td>
-                        <td className="路径列"><code title={target.thread.rolloutPath || '—'}>{target.thread.rolloutPath || '—'}</code></td>
+                        <td className="路径列"><code title={target.thread.rolloutPath || '无路径'}>{target.thread.rolloutPath || '无路径'}</code></td>
                         <td>{target.stores.filter((store) => store.count > 0 || store.store === 'rollout_jsonl').length}</td>
-                        <td title={target.warnings[0] ?? '—'}>{target.warnings[0] ?? '—'}</td>
+                        <td title={target.warnings[0] ?? '无'}>{target.warnings[0] ?? '无'}</td>
                     </tr>
                 ))}
                 </tbody>
